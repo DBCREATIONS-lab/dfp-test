@@ -6,14 +6,257 @@
   <title>Design Fill Pro — Boundary + Preview (Pattern & Fill Collections)</title>
   <meta name="description" content="Upload an SVG, auto-generate a boundary version and apply repeat patterns or collection fills. Includes folder chooser for fill sets and a scale slider." />
   <style>
-    /* ... your existing styles ... no changes required ... */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: #23272f;
+      color: #eee;
+      min-height: 100vh;
+    }
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 32px;
+    }
+    .brand img {
+      max-width: 100px;
+      border-radius: 16px;
+      background: #2d3138;
+      box-shadow: 0 2px 8px #0003;
+    }
+    .header-text {
+      flex: 1;
+    }
+    .welcome {
+      color: #6beeff;
+      font-size: 1.3em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .title {
+      font-size: 2.1em;
+      font-weight: 800;
+      margin-top: 0.2em;
+    }
+    .tagline {
+      font-size: 1.1em;
+      color: #bbb;
+      margin-top: 0.6em;
+      font-weight: 450;
+      max-width: 550px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 14px 18px;
+      background: #22262b;
+      border-radius: 8px;
+      margin-bottom: 22px;
+    }
+    .spacer {
+      flex: 1;
+    }
+    .controls .btn,
+    .controls select,
+    .controls input[type="range"] {
+      font-size: 1em;
+      padding: 5px 18px;
+      border-radius: 7px;
+      border: none;
+      outline: none;
+      background: #30353b;
+      color: #fff;
+      cursor: pointer;
+    }
+    .controls .btn.primary {
+      background: #6beeff;
+      color: #23272f;
+      font-weight: 700;
+      border: none;
+    }
+    .controls .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+    .file-btn {
+      padding: 6px 17px;
+      border-radius: 7px;
+      background: #434651;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .file-btn:focus {
+      outline: 2px solid #6beeff;
+    }
+    .small {
+      font-size: 0.95em;
+      color: #98a3b8;
+    }
+    .folder-chooser {
+      display: flex;
+      align-items: center;
+      background: #343942;
+      border-radius: 7px;
+      padding: 2px 12px;
+    }
+    .folders {
+      display: flex;
+      gap: 8px;
+    }
+    .folders .folder {
+      background: #4d5663;
+      color: #fff;
+      border-radius: 4px;
+      padding: 0 9px;
+      cursor: pointer;
+      font-size: 0.97em;
+    }
+
+    .panel {
+      background: #20252c;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+    .svg-holder {
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0 5px 0;
+      padding: 14px;
+      background: #181b21;
+      border-radius: 8px;
+      min-height: 140px;
+      color: #677081;
+      font-size: 1.08em;
+      font-family: monospace;
+      text-align: center;
+    }
+    .preview-wrap {
+      display: flex;
+      gap: 24px;
+    }
+    .preview-wrap > .panel {
+      flex: 1;
+    }
+    .samples-grid {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .samples-grid .sample {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #333941;
+      border-radius: 6px;
+      background-size: cover;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+    .samples-grid .sample.selected {
+      border: 2.5px solid #6beeff;
+    }
+    .pricing-cta {
+      margin-top: 30px;
+      padding: 21px 28px;
+      background: #1a1e23;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      box-shadow: 0 2px 8px #0002;
+    }
+    .cta-text h3 {
+      margin: 0 0 7px 0;
+      color: #6beeff;
+      letter-spacing: 1px;
+    }
+    .cta-btn {
+      background: #6beeff;
+      color: #23272f;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 22px;
+      border-radius: 7px;
+      margin-right: 8px;
+    }
+    .cta-secondary {
+      color: #bbb;
+      text-decoration: underline;
+      font-weight: 600;
+      font-size: 0.96em;
+    }
+    .note {
+      background: #32394a;
+      color: #adc0ee;
+      border-radius: 7px;
+      padding: 11px 15px;
+      margin-bottom: 24px;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 1200;
+    }
+    .toast {
+      background: #33394a;
+      color: #fff;
+      border-radius: 7px;
+      padding: 12px 26px;
+      box-shadow: 0 3px 7px #0002;
+      margin-top: 12px;
+      animation: fadein 0.4s;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(10px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    @media (max-width: 950px) {
+      .app {
+        padding: 14px;
+      }
+      .site-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+      .preview-wrap {
+        flex-direction: column;
+        gap: 0;
+      }
+      .pricing-cta {
+        flex-direction: column;
+        gap: 7px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="site-header" role="banner" aria-label="Top header">
       <div class="brand">
-        <img src="./logo.png" alt="Design Fill Pro logo" width="440" height="440">
+        <img src="./logo.png" alt="Design Fill Pro logo" width="100" height="100">
       </div>
       <div class="header-text" role="region" aria-label="Welcome text">
         <div class="welcome">Welcome</div>
@@ -45,7 +288,6 @@
         <span id="patternScaleValue" class="small">20</span>px
       </div>
 
-      <!-- HERE'S THE IMPROVED BUTTON LABEL FOR CLARITY -->
       <button id="fillPatternBtn" class="btn primary" disabled>Fill Boundary with Pattern</button>
       <button id="clearBtn" class="btn" disabled>Reset Preview</button>
 
@@ -61,7 +303,6 @@
         <div class="label-row"><div>Boundary</div><div class="small">Generated outlines</div></div>
         <div class="svg-holder" id="boundaryHolder">No SVG loaded</div>
       </div>
-
       <div class="panel" id="previewPanel" aria-label="Preview SVG (modified)">
         <div class="label-row"><div>Preview</div><div class="small">Pattern / fill applied here</div></div>
         <div class="svg-holder" id="previewHolder">No SVG loaded</div>
@@ -88,12 +329,12 @@
   </div>
 
   <div id="toastContainer" class="toast-container" aria-hidden="true"></div>
-  <!-- ...your existing JS, unchanged... -->
   <script>
-    // --- Your full JavaScript from original code here, unchanged ---
-    // For brevity, not repeated unless you want a version with all JS shown,
-    // the critical part is renaming the button for the user experience.
-    // If you want the full JS pasted inline, please let me know.
+    // Show range value for patternScale slider
+    document.getElementById('patternScale').addEventListener('input', function() {
+      document.getElementById('patternScaleValue').textContent = this.value;
+    });
+    // Add additional JS as needed for your app
   </script>
 </body>
 </html>
