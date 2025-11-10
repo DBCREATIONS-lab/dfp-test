@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Design Fill Pro — Boundary + Preview (Pattern & Fill Collections)</title>
+  <meta name="description" content="Upload an SVG, auto-generate a boundary version and apply repeat patterns or collection fills. Includes folder chooser for fill sets and a scale slider." />
+  <style>
+    /* ... your existing styles ... no changes required ... */
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="site-header" role="banner" aria-label="Top header">
+      <div class="brand">
+        <img src="./logo.png" alt="Design Fill Pro logo" width="440" height="440">
+      </div>
+      <div class="header-text" role="region" aria-label="Welcome text">
+        <div class="welcome">Welcome</div>
+        <div class="title">Creative Art &amp; Design Solutions</div>
+        <div class="tagline">Transform your ideas from your uploaded outlines and filled with stunning fills of your choice.</div>
+      </div>
+    </header>
+
+    <div class="controls" role="toolbar" aria-label="SVG controls">
+      <label class="file-btn" for="fileInput" tabindex="0">Upload SVG</label>
+      <input id="fileInput" type="file" accept=".svg" style="display:none">
+      <button id="diagnosticBtn" class="btn" type="button" style="margin-left:8px;">Check Fills Diagnostic</button>
+
+      <select id="patternSelect" aria-label="Choose pattern">
+        <option value="stripes">Diagonal Stripes</option>
+        <option value="dots">Dots</option>
+        <option value="grid">Grid</option>
+        <option value="hatch">Hatch</option>
+      </select>
+
+      <div class="folder-chooser" title="Choose a fill folder">
+        <div style="font-weight:700;color:#fff;margin-right:8px">Fill Collection</div>
+        <div id="foldersContainer" class="folders"></div>
+      </div>
+
+      <div style="display:inline-flex;align-items:center;gap:8px;">
+        <label for="patternScale" class="small" style="color:var(--muted);font-weight:600">Pattern scale</label>
+        <input id="patternScale" type="range" min="6" max="160" value="20" step="1" aria-label="Pattern scale">
+        <span id="patternScaleValue" class="small">20</span>px
+      </div>
+
+      <!-- HERE'S THE IMPROVED BUTTON LABEL FOR CLARITY -->
+      <button id="fillPatternBtn" class="btn primary" disabled>Fill Boundary with Pattern</button>
+      <button id="clearBtn" class="btn" disabled>Reset Preview</button>
+
+      <div class="spacer"></div>
+
+      <button id="downloadPreviewBtn" class="btn" disabled>Download Preview SVG</button>
+    </div>
+
+    <div class="note" id="note">Choose a fill collection to see available fills. If a collection is empty, add SVG files into OneDrive/fills/&lt;folder&gt; and run the generator to update index.json.</div>
+
+    <div class="preview-wrap" aria-live="polite">
+      <div class="panel" id="boundaryPanel" aria-label="Boundary SVG (generated)">
+        <div class="label-row"><div>Boundary</div><div class="small">Generated outlines</div></div>
+        <div class="svg-holder" id="boundaryHolder">No SVG loaded</div>
+      </div>
+
+      <div class="panel" id="previewPanel" aria-label="Preview SVG (modified)">
+        <div class="label-row"><div>Preview</div><div class="small">Pattern / fill applied here</div></div>
+        <div class="svg-holder" id="previewHolder">No SVG loaded</div>
+        <div style="margin-top:10px;">
+          <div class="small">Available fills:</div>
+          <div id="samplesGrid" class="samples-grid">No collection selected</div>
+        </div>
+        <div style="padding-top:8px;">
+          <div id="previewInfo" class="small"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-cta" role="region" aria-label="Pricing call to action">
+      <div class="cta-text">
+        <h3>Ready for your awesome Designs?</h3>
+        <p>No subscriptions, no hidden fees. Just pure creative power. Get your credits and start bringing your ideas to life today.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="cta-btn" href="./pricing.html" id="viewPricingBtn" aria-label="View Pricing and Credits">View Pricing &amp; Credits</a>
+        <a class="cta-secondary" href="#note" onclick="document.getElementById('fileInput').focus();return false;">Upload a file</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container" aria-hidden="true"></div>
+  <!-- ...your existing JS, unchanged... -->
+  <script>
+    // --- Your full JavaScript from original code here, unchanged ---
+    // For brevity, not repeated unless you want a version with all JS shown,
+    // the critical part is renaming the button for the user experience.
+    // If you want the full JS pasted inline, please let me know.
+  </script>
+</body>
+</html>
