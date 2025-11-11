@@ -1,18 +1,76 @@
-# SVG Filigree Fitter Demo
+# AI Laser Engraving Fill Generator
 
-A web-based tool for fitting ornate filigree patterns into custom boundary shapes. Perfect for creating decorative knife handles, jewelry designs, or any artistic engraving work.
+A boundary-aware AI pattern generation tool that works exactly like engravefill.app - upload shape outlines, detect boundaries, and fill only inside shapes with AI-generated patterns.
 
 ## Features
 
-- **Upload Custom Boundaries**: Import SVG files with path outlines (knife handles, shapes, etc.)
-- **Pattern Library**: Choose from pre-made filigree patterns or upload your own
-- **Adjustable Scaling**: Real-time pattern scaling from 0.1x to 2.5x
-- **SVG Clipping**: Automatically clips patterns to fit within boundary shapes
-- **Download Results**: Export your finished design as an SVG file
+- **Boundary Detection**: Automatically detects shape boundaries from uploaded images
+- **AI Pattern Generation**: Uses Replicate ControlNet-Canny model for intelligent pattern creation
+- **Precise Filling**: Fills only inside the detected shape boundaries
+- **Real-time Preview**: Live preview of boundary detection and pattern generation
+- **Multiple Formats**: Supports various image formats (PNG, JPG, SVG)
+- **SVG Clipping**: Traditional pattern fitting with pre-made filigree patterns
+- **Adjustable Scaling**: Real-time pattern scaling and customization
 
-## Getting Started
+## Architecture
 
-### Quick Start
+```
+Frontend (HTML/JS) → Backend (Node.js/Express) → Replicate API → AI Model
+       ↓                        ↓                     ↓            ↓
+   FormData Upload    →    File Processing   →   ControlNet   →  Pattern
+   Boundary Display   ←    Error Handling    ←   Generation   ←  Output
+```
+
+## Project Structure
+
+```
+dfp-test/
+├── ai-engrave-boundary-fill.html    # Main AI boundary-aware tool
+├── index.html                       # Traditional filigree fitting tool
+├── test-ai-generation.html          # Debugging interface
+├── backend/
+│   ├── server.js                    # Express server with Replicate API
+│   ├── package.json                 # Dependencies
+│   ├── .env.example                 # Environment template
+│   └── .env                         # Your API keys (not in git)
+└── examples/                        # Test images and SVG files
+```
+
+## Quick Setup
+
+### For AI Generation (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/DBCREATIONS-lab/dfp-test.git
+   cd dfp-test
+   ```
+
+2. **Install backend dependencies**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+3. **Configure API token**
+   ```bash
+   # Copy the example file
+   cp .env.example .env
+   
+   # Edit .env and add your Replicate API token
+   # Get token from: https://replicate.com/account/api-tokens
+   ```
+
+4. **Start the server**
+   ```bash
+   npm start
+   ```
+
+5. **Open the application**
+   - Open `ai-engrave-boundary-fill.html` in your browser
+   - Or use `test-ai-generation.html` for debugging
+
+### For Traditional Filigree Fitting
 
 1. Open `index.html` in a web browser
 2. Upload a boundary shape SVG (or use examples in the `examples/` folder)
@@ -40,39 +98,88 @@ A web-based tool for fitting ornate filigree patterns into custom boundary shape
 3. **Clipping**: SVG clipPath is used to mask the pattern within the boundary
 4. **Export**: The final composition is saved as a downloadable SVG
 
-## Usage Tips
+## Usage
 
-- **Boundary SVGs**: Use simple, closed paths for best results. Complex multi-path shapes may need manual editing
-- **Pattern SVGs**: Seamless or near-seamless patterns work best for a professional look
-- **Scale Adjustment**: Start with default scale (1.0x) and adjust to your preference
-- **Black & White**: Patterns with clear contrast produce the best engraving results
+### AI Pattern Generation
+1. **Upload Shape**: Select an image file with clear shape boundaries
+2. **Boundary Detection**: The tool automatically detects shape edges
+3. **Pattern Generation**: AI generates patterns that fill only inside the shape
+4. **Download Result**: Save the filled pattern as an image
 
-## Technical Details
+### Traditional Filigree Fitting
+1. Upload boundary shapes and filigree patterns
+2. Adjust scaling and positioning
+3. Preview the clipped result
+4. Download as SVG
 
-- Pure HTML/CSS/JavaScript - no server required
-- Uses SVG `<clipPath>` for boundary fitting
-- Pattern tiling via SVG `<pattern>` element
-- Client-side file processing with FileReader API
+## API Configuration
 
-## Browser Compatibility
+The AI backend requires a Replicate API token:
 
-Works in all modern browsers:
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
+1. Sign up at [Replicate](https://replicate.com)
+2. Go to [Account → API Tokens](https://replicate.com/account/api-tokens)
+3. Create a new token
+4. Add it to `backend/.env`:
+   ```bash
+   REPLICATE_API_TOKEN=r8_your_token_here
+   PORT=3000
+   ```
+
+## Development
+
+### Backend Development
+```bash
+cd backend
+npm run dev  # Start with nodemon for auto-reload
+```
+
+### Debugging
+- Use `test-ai-generation.html` for step-by-step debugging
+- Check browser console for detailed error logs
+- Server logs show Replicate API responses
+
+### File Structure
+- `ai-engrave-boundary-fill.html`: AI-powered boundary detection and filling
+- `index.html`: Traditional filigree pattern fitting
+- `backend/server.js`: Express server with file upload and AI processing
+- `examples/`: Test images and boundary shapes
+
+## Troubleshooting
+
+**Server won't start:**
+- Check that your API token is valid
+- Ensure port 3000 is available
+- Run `npm install` in the backend directory
+
+**Generation fails:**
+- Verify your Replicate API token has credits
+- Check that uploaded images have clear boundaries
+- Use the test interface for detailed error messages
+
+**CORS errors:**
+- Make sure the backend server is running on localhost:3000
+- Check that both frontend and backend are on the same domain
+
+**Pattern not showing (Traditional Tool):**
+- Check that both boundary and pattern files are valid SVG
+- Ensure files contain `<path>` elements
+- Try adjusting the scale slider
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
 
-This is a demo project. Feel free to use and modify for your needs.
+This project is open source and available under the MIT License.
 
-## Repository
+## Credits
 
-Source: [https://github.com/DBCREATIONS-lab/dfp-test](https://github.com/DBCREATIONS-lab/dfp-test)
-
-## Future Enhancements
-
-- AI-based intelligent pattern rearrangement
-- Multiple pattern layers
-- Color customization
-- Pattern rotation and positioning controls
-- Save/load project functionality
+- Built with [Replicate](https://replicate.com) ControlNet-Canny model
+- Inspired by engravefill.app functionality
+- Uses Express.js, Multer, and HTML5 Canvas
+- Traditional filigree fitting with SVG clipping
