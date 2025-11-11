@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Production Filigree Fill Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #1a1d24;
+      color: #e7e7e7;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #23272f;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #6beeff;
+      margin-top: 0;
+    }
+    .subtitle {
+      color: #98a3b8;
+      margin-top: -12px;
+      margin-bottom: 24px;
+    }
+    .info-box {
+      background: #2a3040;
+      border-left: 4px solid #6beeff;
+      padding: 16px 20px;
+      margin: 20px 0;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+    .warning-box {
+      background: #3a2f20;
+      border-left: 4px solid #ffb84d;
+      padding: 16px 20px;
+      margin: 20px 0;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+    .section {
+      background: #1a1e23;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .section-title {
+      color: #6beeff;
+      font-size: 1.1em;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: 600;
+      color: #d0d8e8;
+    }
+    .label-desc {
+      font-size: 0.9em;
+      color: #98a3b8;
+      font-weight: 400;
+      margin-top: 4px;
+    }
+    input[type="file"] {
+      margin-top: 8px;
+      padding: 8px;
+      background: #2a3040;
+      border: 1px solid #3a4050;
+      border-radius: 4px;
+      color: #e7e7e7;
+      width: 100%;
+      max-width: 400px;
+    }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .control-group {
+      background: #2a3040;
+      padding: 16px;
+      border-radius: 6px;
+    }
+    .control-label {
+      font-weight: 600;
+      color: #d0d8e8;
+      margin-bottom: 8px;
+      display: block;
+    }
+    select, input[type="range"] {
+      width: 100%;
+      margin-top: 8px;
+    }
+    select {
+      padding: 8px;
+      background: #1a1e23;
+      border: 1px solid #3a4050;
+      border-radius: 4px;
+      color: #e7e7e7;
+      font-size: 1em;
+    }
+    .value-display {
+      display: inline-block;
+      min-width: 50px;
+      text-align: right;
+      color: #6beeff;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .preview-area {
+      background: #0d0f12;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    #svgOutput {
+      background: #ffffff;
+      border-radius: 8px;
+      margin: 0 auto;
+      display: block;
+      width: 100%;
+      height: 500px;
+      border: 2px solid #3a4050;
+    }
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #6beeff;
+      color: #181b21;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #8cf4ff;
+      transform: translateY(-1px);
+    }
+    button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: #4a5568;
+      color: #e7e7e7;
+    }
+    button.secondary:hover:not(:disabled) {
+      background: #5a6578;
+    }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+    }
+    .status.show {
+      display: block;
+    }
+    .status.success {
+      background: #1a3a2a;
+      border-left: 4px solid #4ade80;
+      color: #86efac;
+    }
+    .status.error {
+      background: #3a1a1a;
+      border-left: 4px solid #f87171;
+      color: #fca5a5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Production Filigree Fill Generator</h1>
+    <p class="subtitle">Professional tool for creating custom laser-ready engraving patterns</p>
+    
+    <div class="info-box">
+      <strong>💡 How This Works:</strong><br>
+      1. Upload a <strong>reference filigree style</strong> (Western scrollwork, acanthus leaf, baroque, etc.)<br>
+      2. Upload your <strong>boundary shape</strong> (knife blade, panel, frame, etc.)<br>
+      3. The tool will <strong>intelligently fill</strong> your shape with elements matching the reference style<br>
+      4. Download production-ready SVG for laser engraving
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">📁 File Uploads</h3>
+      
+      <label>
+        Reference Filigree Pattern
+        <div class="label-desc">Upload your style reference (one of your 9 filigree SVGs or any decorative pattern)</div>
+        <input type="file" id="patternSVG" accept=".svg"/>
+      </label>
+      
+      <label>
+        Boundary Shape
+        <div class="label-desc">The outline to fill (knife blade, panel, frame - must contain at least one path)</div>
+        <input type="file" id="boundarySVG" accept=".svg"/>
+      </label>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">⚙️ Fill Settings</h3>
+      
+      <div class="controls-grid">
+        <div class="control-group">
+          <label class="control-label">Fill Algorithm</label>
+          <select id="fillMode">
+            <option value="intelligent">Intelligent Fill (Style-Aware)</option>
+            <option value="dense">Dense Contour Fill</option>
+            <option value="organic">Organic Scatter</option>
+            <option value="tile">Simple Tile Pattern</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Fill Density
+            <span class="value-display" id="densityVal">12</span> layers
+          </label>
+          <input type="range" min="5" max="25" step="1" id="density" value="12" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Element Scale
+            <span class="value-display" id="scaleVal">1.00</span>x
+          </label>
+          <input type="range" min="0.3" max="3.0" step="0.05" id="scale" value="1.0" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Element Spacing
+            <span class="value-display" id="spacingVal">0.5</span>
+          </label>
+          <input type="range" min="0.1" max="1.5" step="0.05" id="spacing" value="0.5" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Edge Padding
+            <span class="value-display" id="paddingVal">5</span>px
+          </label>
+          <input type="range" min="0" max="50" step="1" id="padding" value="5" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Rotation Variance
+            <span class="value-display" id="rotationVal">30</span>°
+          </label>
+          <input type="range" min="0" max="90" step="5" id="rotationVariance" value="30" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            Scale Variance
+            <span class="value-display" id="scaleVarianceVal">20</span>%
+          </label>
+          <input type="range" min="0" max="50" step="5" id="scaleVariance" value="20" />
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">Border Outline Width</label>
+          <input type="range" min="0" max="10" step="0.5" id="borderWidth" value="2" />
+          <span class="value-display" id="borderVal">2</span>px
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-area">
+      <svg id="svgOutput" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    
+    <div class="status" id="status"></div>
+
+    <div class="button-group">
+      <button id="generateBtn" disabled>🎨 Generate Fill Pattern</button>
+      <button id="downloadBtn" disabled>💾 Download Laser-Ready SVG</button>
+      <button id="debugToggle" class="secondary">🐛 Toggle Debug Mode (Show Placement Points)</button>
+      <button id="downloadDXF" disabled class="secondary">📐 Export DXF (Coming Soon)</button>
+    </div>
+
+    <div class="warning-box" style="margin-top: 24px;">
+      <strong>⚠️ Current Limitations:</strong><br>
+      • This is a pattern distribution engine - it doesn't yet analyze/decompose your reference style into individual elements<br>
+      • For true AI-powered style analysis, you would need machine learning (pattern recognition, element extraction)<br>
+      • Current algorithm: Takes your reference pattern and intelligently distributes copies throughout the boundary<br>
+      • <strong>Roadmap:</strong> Style decomposition, element variation generation, smart gap filling
+    </div>
+  </div>
+
+  <script>
+    // State
+    let boundaryPath = '';
+    let patternSVG = '';
+    let debugMode = false; // Set to true to see placement points
+    let config = {
+      fillMode: 'intelligent',
+      density: 12,
+      scale: 1.0,
+      spacing: 0.5,
+      padding: 5,
+      rotationVariance: 30,
+      scaleVariance: 20,
+      borderWidth: 2
+    };
+
+    // Helper: Parse SVG string to DOM
+    function parseSVG(svgStr) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgStr, 'image/svg+xml');
+      return doc.querySelector('svg');
+    }
+
+    // Helper: Convert pattern to black strokes (laser-ready)
+    function convertToLaserReady(svgElement) {
+      if (!svgElement) return null;
+      
+      const cloned = svgElement.cloneNode(true);
+      
+      // Remove all style tags
+      cloned.querySelectorAll('style').forEach(el => el.remove());
+      
+      // Convert all shapes to black strokes
+      const shapes = cloned.querySelectorAll('path, circle, rect, polygon, ellipse, line, polyline');
+      shapes.forEach(shape => {
+        shape.removeAttribute('class');
+        shape.removeAttribute('style');
+        shape.setAttribute('stroke', '#000000');
+        shape.setAttribute('fill', 'none');
+        const existingStrokeWidth = shape.getAttribute('stroke-width');
+        if (!existingStrokeWidth || parseFloat(existingStrokeWidth) < 0.5) {
+          shape.setAttribute('stroke-width', '1');
+        }
+      });
+      
+      console.log(`Converted ${shapes.length} shapes to laser-ready (black strokes)`);
+      
+      return cloned;
+    }
+
+    // Helper: Get path bounding box
+    function getPathBBox(pathD) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 1000 1000');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathD);
+      svg.appendChild(path);
+      document.body.appendChild(svg);
+      const bbox = path.getBBox();
+      document.body.removeChild(svg);
+      return bbox;
+    }
+
+    // Main fill generation algorithm
+    function generateFill() {
+      const outputSVG = document.getElementById('svgOutput');
+      outputSVG.innerHTML = '';
+      
+      // Clean up previous hit test
+      cleanupHitTest();
+      
+      if (!boundaryPath || !patternSVG) {
+        showStatus('Please upload both boundary and pattern files', 'error');
+        return;
+      }
+
+      // Initialize hit testing
+      initHitTest(boundaryPath);
+
+      const bbox = getPathBBox(boundaryPath);
+      
+      // Adjust viewBox
+      const padding = bbox.width * 0.1;
+      outputSVG.setAttribute('viewBox', 
+        `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding * 2} ${bbox.height + padding * 2}`
+      );
+
+      // Create clip path and container
+      const useClipping = !debugMode; // Disable clipping in debug mode
+      outputSVG.innerHTML = `
+        <defs>
+          <clipPath id="boundaryClip">
+            <path d="${boundaryPath}"/>
+          </clipPath>
+        </defs>
+        <rect x="${bbox.x - padding * 2}" y="${bbox.y - padding * 2}" 
+              width="${bbox.width + padding * 4}" height="${bbox.height + padding * 4}" 
+              fill="#f5f5f5" opacity="0.3"/>
+        <g id="fillContainer" ${useClipping ? 'clip-path="url(#boundaryClip)"' : ''}></g>
+        <path d="${boundaryPath}" fill="none" stroke="#262a35" stroke-width="${Math.max(config.borderWidth, 2)}" pointer-events="none"/>
+      `;
+
+      const container = outputSVG.querySelector('#fillContainer');
+      
+      // Get pattern dimensions
+      const patternDOM = parseSVG(patternSVG);
+      const laserPattern = convertToLaserReady(patternDOM);
+      
+      let patternWidth = 200, patternHeight = 200;
+      if (patternDOM) {
+        const vb = patternDOM.getAttribute('viewBox');
+        if (vb) {
+          const parts = vb.split(/\s+|,/);
+          patternWidth = parseFloat(parts[2]) || 200;
+          patternHeight = parseFloat(parts[3]) || 200;
+        }
+        
+        // Try to get actual bbox if no viewBox
+        if (!vb && patternDOM.getBBox) {
+          try {
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.visibility = 'hidden';
+            tempContainer.appendChild(patternDOM.cloneNode(true));
+            document.body.appendChild(tempContainer);
+            const bbox = patternDOM.getBBox();
+            patternWidth = bbox.width;
+            patternHeight = bbox.height;
+            document.body.removeChild(tempContainer);
+          } catch(e) {
+            console.warn('Could not get pattern bbox, using defaults');
+          }
+        }
+      }
+      
+      console.log(`Pattern dimensions: ${patternWidth} x ${patternHeight}`);
+      console.log(`Boundary dimensions: ${bbox.width.toFixed(1)} x ${bbox.height.toFixed(1)}`);
+      
+      // Auto-scale pattern to reasonable size relative to boundary
+      // Target: pattern should fill nicely - about 15-25% of boundary smallest dimension
+      const boundarySmallest = Math.min(bbox.width, bbox.height);
+      const patternLargest = Math.max(patternWidth, patternHeight);
+      const autoScale = (boundarySmallest / patternLargest) * 0.15; // 15% for dense overlapping fill
+      const effectiveScale = config.scale * autoScale;
+      
+      console.log(`Auto-scale calculated: ${autoScale.toFixed(3)} (boundary: ${boundarySmallest.toFixed(1)}, pattern: ${patternLargest.toFixed(1)})`);
+      console.log(`Effective scale: ${effectiveScale.toFixed(3)}, Final pattern size: ${(patternWidth * effectiveScale).toFixed(1)} x ${(patternHeight * effectiveScale).toFixed(1)}`);
+      
+      // Temporarily override config.scale with effective scale
+      const originalScale = config.scale;
+      config.scale = effectiveScale;
+
+      // Generate fill based on algorithm
+      if (config.fillMode === 'intelligent' || config.fillMode === 'dense') {
+        generateContourFill(container, laserPattern, bbox, patternWidth, patternHeight);
+      } else if (config.fillMode === 'organic') {
+        generateOrganicFill(container, laserPattern, bbox, patternWidth, patternHeight);
+      } else {
+        generateTileFill(container, laserPattern, bbox, patternWidth, patternHeight);
+      }
+      
+      // Restore original scale
+      config.scale = originalScale;
+
+      showStatus(`✓ Generated fill with ${container.children.length} elements`, 'success');
+      document.getElementById('downloadBtn').disabled = false;
+    }
+
+    // Helper: Check if point is inside the boundary path using SVG native method
+    let hitTestPath = null;
+    let hitTestSVG = null;
+    
+    function initHitTest(pathD) {
+      // Create a persistent SVG for hit testing
+      if (hitTestSVG) {
+        document.body.removeChild(hitTestSVG);
+      }
+      hitTestSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      hitTestSVG.style.position = 'absolute';
+      hitTestSVG.style.visibility = 'hidden';
+      hitTestSVG.setAttribute('width', '10000');
+      hitTestSVG.setAttribute('height', '10000');
+      
+      hitTestPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      hitTestPath.setAttribute('d', pathD);
+      hitTestSVG.appendChild(hitTestPath);
+      document.body.appendChild(hitTestSVG);
+    }
+    
+    function isPointInPath(x, y, pathD) {
+      if (!hitTestPath) {
+        initHitTest(pathD);
+      }
+      
+      // Use SVG's native isPointInFill method
+      const pt = hitTestSVG.createSVGPoint();
+      pt.x = x;
+      pt.y = y;
+      const result = hitTestPath.isPointInFill(pt);
+      
+      // Debug logging
+      if (debugMode && Math.random() < 0.05) {
+        console.log(`Testing point (${x.toFixed(1)}, ${y.toFixed(1)}): ${result ? 'INSIDE' : 'OUTSIDE'}`);
+      }
+      
+      return result;
+    }
+    
+    function cleanupHitTest() {
+      if (hitTestSVG && document.body.contains(hitTestSVG)) {
+        document.body.removeChild(hitTestSVG);
+      }
+      hitTestPath = null;
+      hitTestSVG = null;
+    }
+
+    // Contour-following fill algorithm (intelligent/dense)
+    function generateContourFill(container, pattern, bbox, pW, pH) {
+      // Create temporary path for measurements
+      const tempSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      tempPath.setAttribute('d', boundaryPath);
+      tempSVG.appendChild(tempPath);
+      document.body.appendChild(tempSVG);
+      
+      const pathLength = tempPath.getTotalLength();
+      
+      // DENSE FILL - many more layers and elements for complete coverage
+      const layers = Math.max(config.density * 2, 20); // At least 20 layers
+      const maxInset = Math.min(bbox.width, bbox.height) * 0.48; // Fill almost entire depth
+      
+      const patternSize = Math.max(pW, pH) * config.scale;
+      const baseSpacing = patternSize * config.spacing * 0.5; // Much tighter spacing
+      
+      let count = 0;
+      let attempts = 0;
+      const maxAttempts = layers * 200;
+      
+      for (let layer = 0; layer < layers; layer++) {
+        const layerProgress = layer / Math.max(layers - 1, 1);
+        const insetDist = config.padding + (layerProgress * maxInset);
+        
+        // High density throughout - more patterns everywhere
+        const densityFactor = 2.0 - (layerProgress * 0.3); // 2.0x to 1.7x density
+        const spacing = baseSpacing / densityFactor;
+        const numInLayer = Math.max(Math.floor((pathLength / spacing) * densityFactor), 8);
+        
+        // Stagger with more randomness for organic fill
+        const stagger = (layer % 3) * 0.25 + Math.random() * 0.4;
+        
+        for (let i = 0; i < numInLayer && attempts < maxAttempts; i++) {
+          attempts++;
+          
+          const posRatio = ((i + stagger) / numInLayer) % 1;
+          const pathDist = posRatio * pathLength;
+          
+          const pt = tempPath.getPointAtLength(pathDist);
+          const nextDist = Math.min(pathDist + 5, pathLength);
+          const nextPt = tempPath.getPointAtLength(nextDist);
+          const tangent = Math.atan2(nextPt.y - pt.y, nextPt.x - pt.x);
+          
+          // Calculate perpendicular inward direction (normal to the path)
+          const normalAngle = tangent + Math.PI / 2;
+          
+          // Move inward along the normal
+          const x = pt.x + Math.cos(normalAngle) * insetDist;
+          const y = pt.y + Math.sin(normalAngle) * insetDist;
+          
+          // Check if this point is actually inside the boundary
+          if (!isPointInPath(x, y, boundaryPath)) {
+            // Try opposite direction (for concave shapes)
+            const x2 = pt.x - Math.cos(normalAngle) * insetDist;
+            const y2 = pt.y - Math.sin(normalAngle) * insetDist;
+            
+            if (!isPointInPath(x2, y2, boundaryPath)) {
+              continue; // Skip this position if neither direction works
+            }
+            
+            // Use the opposite direction
+            if (debugMode) {
+              // Add debug marker
+              const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              circle.setAttribute('cx', x2);
+              circle.setAttribute('cy', y2);
+              circle.setAttribute('r', '3');
+              circle.setAttribute('fill', 'green');
+              container.appendChild(circle);
+            }
+            createPatternElement(container, pattern, x2, y2, tangent, pW, pH);
+            count++;
+            continue;
+          }
+          
+          // Create element at this position
+          if (debugMode) {
+            // Add debug marker
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', '3');
+            circle.setAttribute('fill', 'blue');
+            circle.setAttribute('opacity', '0.7');
+            container.appendChild(circle);
+          }
+          createPatternElement(container, pattern, x, y, tangent, pW, pH);
+          count++;
+        }
+      }
+      
+      document.body.removeChild(tempSVG);
+      console.log(`Dense contour fill: ${count} elements across ${layers} layers (${attempts} attempts)`);
+      
+      if (debugMode) {
+        console.log(`DEBUG: Pattern has ${pattern ? pattern.children.length : 0} children`);
+        console.log(`DEBUG: Container has ${container.children.length} total children`);
+        
+        // Add a test rectangle at the first pattern position to verify scale
+        const testRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        testRect.setAttribute('x', -50);
+        testRect.setAttribute('y', -50);
+        testRect.setAttribute('width', 100);
+        testRect.setAttribute('height', 100);
+        testRect.setAttribute('fill', 'rgba(255,0,0,0.3)');
+        testRect.setAttribute('stroke', 'red');
+        testRect.setAttribute('stroke-width', '2');
+        
+        const firstG = container.querySelector('g');
+        if (firstG) {
+          const testG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          testG.setAttribute('transform', firstG.getAttribute('transform'));
+          testG.appendChild(testRect);
+          container.appendChild(testG);
+          console.log('Added test rectangle at first pattern position');
+        }
+      }
+    }
+    
+    // Helper to create pattern element
+    function createPatternElement(container, pattern, x, y, tangentAngle, pW, pH) {
+      if (!pattern) {
+        alert('ERROR: No pattern provided to createPatternElement');
+        return;
+      }
+      
+      // Rotation
+      const baseRot = tangentAngle * 180 / Math.PI;
+      const rotVar = (Math.random() - 0.5) * config.rotationVariance;
+      const rotation = baseRot + rotVar;
+      
+      // Scale variation
+      const scaleVar = 1 + ((Math.random() - 0.5) * (config.scaleVariance / 100) * 2);
+      const finalScale = config.scale * scaleVar;
+      
+      // Random flips
+      const flipH = Math.random() > 0.6 ? -1 : 1;
+      const flipV = Math.random() > 0.8 ? -1 : 1;
+      
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('transform', 
+        `translate(${x},${y}) rotate(${rotation}) scale(${finalScale * flipH},${finalScale * flipV})`
+      );
+      g.setAttribute('opacity', 0.95);
+      
+      if (pattern && pattern.children) {
+        let childCount = 0;
+        Array.from(pattern.children).forEach(child => {
+          const clonedChild = child.cloneNode(true);
+          g.appendChild(clonedChild);
+          childCount++;
+        });
+        
+        if (debugMode && childCount === 0) {
+          alert('WARNING: Pattern has no children to clone!');
+        }
+      }
+      
+      container.appendChild(g);
+    }
+
+    // Organic scatter fill
+    function generateOrganicFill(container, pattern, bbox, pW, pH) {
+      const numElements = config.density * 15; // More attempts for better coverage
+      
+      let placed = 0;
+      let attempts = 0;
+      const maxAttempts = numElements * 3;
+      
+      while (placed < numElements && attempts < maxAttempts) {
+        attempts++;
+        
+        // Random position within bounding box
+        const x = bbox.x + Math.random() * bbox.width;
+        const y = bbox.y + Math.random() * bbox.height;
+        
+        // Check if point is inside the boundary
+        if (!isPointInPath(x, y, boundaryPath)) {
+          continue; // Skip points outside the boundary
+        }
+        
+        // Apply padding check
+        if (config.padding > 0) {
+          // Sample points around this position to ensure we're not too close to edge
+          let tooCloseToEdge = false;
+          const checkRadius = config.padding;
+          for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+            const checkX = x + Math.cos(angle) * checkRadius;
+            const checkY = y + Math.sin(angle) * checkRadius;
+            if (!isPointInPath(checkX, checkY, boundaryPath)) {
+              tooCloseToEdge = true;
+              break;
+            }
+          }
+          if (tooCloseToEdge) continue;
+        }
+        
+        const rotation = Math.random() * 360;
+        const scaleVar = 0.7 + Math.random() * 0.6;
+        const finalScale = config.scale * scaleVar;
+        
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${x},${y}) rotate(${rotation}) scale(${finalScale})`);
+        g.setAttribute('opacity', 0.9);
+        
+        if (pattern) {
+          Array.from(pattern.children).forEach(child => {
+            g.appendChild(child.cloneNode(true));
+          });
+        }
+        
+        container.appendChild(g);
+        placed++;
+      }
+      
+      console.log(`Organic fill: ${placed} elements placed (${attempts} attempts)`);
+    }
+
+    // Simple tile fill
+    function generateTileFill(container, pattern, bbox, pW, pH) {
+      const tileW = pW * config.scale;
+      const tileH = pH * config.scale;
+      const cols = Math.ceil(bbox.width / (tileW * config.spacing)) + 1;
+      const rows = Math.ceil(bbox.height / (tileH * config.spacing)) + 1;
+      
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = bbox.x + col * tileW * config.spacing;
+          const y = bbox.y + row * tileH * config.spacing;
+          
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('transform', `translate(${x},${y}) scale(${config.scale})`);
+          
+          if (pattern) {
+            Array.from(pattern.children).forEach(child => {
+              g.appendChild(child.cloneNode(true));
+            });
+          }
+          
+          container.appendChild(g);
+        }
+      }
+    }
+
+    // Status message
+    function showStatus(message, type) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = `status show ${type}`;
+      setTimeout(() => status.classList.remove('show'), 5000);
+    }
+
+    // File uploads
+    document.getElementById('patternSVG').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        patternSVG = evt.target.result;
+        showStatus('✓ Pattern loaded', 'success');
+        checkReady();
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('boundarySVG').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const svgText = evt.target.result;
+        const match = svgText.match(/<path[^>]*d=["']([^"']+)["']/i);
+        if (match) {
+          boundaryPath = match[1];
+          showStatus('✓ Boundary loaded', 'success');
+          checkReady();
+        } else {
+          showStatus('Error: No path found in boundary SVG', 'error');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    function checkReady() {
+      const ready = boundaryPath && patternSVG;
+      document.getElementById('generateBtn').disabled = !ready;
+      if (ready) generateFill();
+    }
+
+    // Control updates
+    ['density', 'scale', 'spacing', 'padding', 'rotationVariance', 'scaleVariance', 'borderWidth'].forEach(id => {
+      const input = document.getElementById(id);
+      const display = document.getElementById(id + 'Val');
+      
+      input.addEventListener('input', function() {
+        config[id] = parseFloat(this.value);
+        if (display) {
+          let val = this.value;
+          if (id === 'scale') val = parseFloat(val).toFixed(2);
+          if (id === 'spacing') val = parseFloat(val).toFixed(1);
+          display.textContent = val;
+        }
+        if (boundaryPath && patternSVG) generateFill();
+      });
+    });
+
+    document.getElementById('fillMode').addEventListener('change', function() {
+      config.fillMode = this.value;
+      if (boundaryPath && patternSVG) generateFill();
+    });
+
+    // Generate button
+    document.getElementById('generateBtn').addEventListener('click', generateFill);
+
+    // Debug toggle
+    document.getElementById('debugToggle').addEventListener('click', function() {
+      debugMode = !debugMode;
+      this.textContent = debugMode ? '🐛 Debug ON - Clipping Disabled' : '🐛 Toggle Debug Mode';
+      this.style.background = debugMode ? '#f59e0b' : '#4a5568';
+      if (boundaryPath && patternSVG) generateFill();
+    });
+
+    // Download
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const svg = document.getElementById('svgOutput');
+      const data = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg.outerHTML;
+      const blob = new Blob([data], {type: 'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'laser-engraving-ready.svg';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      showStatus('✓ SVG downloaded', 'success');
+    });
+  </script>
+</body>
+</html>

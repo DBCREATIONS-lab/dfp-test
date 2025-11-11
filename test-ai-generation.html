@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - AI Boundary Fill</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Quick Test - AI Boundary Fill</h1>
+        
+        <button onclick="testServer()">Test Server Connection</button>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <h3>Click to Upload Test Image</h3>
+            <p>Upload any image to test boundary detection</p>
+        </div>
+        
+        <canvas id="testCanvas" width="400" height="300" style="display: none;"></canvas>
+        
+        <button onclick="testGeneration()" id="generateBtn" disabled>Test AI Generation</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let testImage = null;
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    testImage = img;
+                    displayTestImage(img);
+                    document.getElementById('generateBtn').disabled = false;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        function displayTestImage(img) {
+            const canvas = document.getElementById('testCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            
+            // Scale image to fit canvas
+            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+            const scaledWidth = img.width * scale;
+            const scaledHeight = img.height * scale;
+            const x = (canvas.width - scaledWidth) / 2;
+            const y = (canvas.height - scaledHeight) / 2;
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+            
+            log('✅ Image loaded and displayed');
+        }
+        
+        async function testServer() {
+            log('🔄 Testing server connection...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/test');
+                const data = await response.json();
+                
+                log(`✅ Server Response:
+Status: ${response.status}
+Data: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.hasToken) {
+                    log('✅ API token is configured');
+                } else {
+                    log('❌ API token is missing');
+                }
+                
+            } catch (error) {
+                log(`❌ Server connection failed: ${error.message}`);
+            }
+        }
+        
+        async function testGeneration() {
+            if (!testImage) {
+                log('❌ No image uploaded');
+                return;
+            }
+            
+            log('🎨 Testing AI generation...');
+            
+            try {
+                const canvas = document.getElementById('testCanvas');
+                
+                // Convert canvas to blob
+                const blob = await new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/png', 0.9);
+                });
+                
+                // Create FormData
+                const formData = new FormData();
+                formData.append('boundaryImage', blob, 'test.png');
+                formData.append('prompt', 'simple test pattern, black lines on white background');
+                formData.append('negative_prompt', 'blurry, low quality');
+                formData.append('guidance_scale', '12');
+                formData.append('num_inference_steps', '20');
+                formData.append('controlnet_conditioning_scale', '1.5');
+                
+                log('📤 Sending generation request...');
+                
+                const response = await fetch('http://localhost:3000/api/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                log(`📥 Response status: ${response.status}`);
+                
+                const data = await response.json();
+                
+                log(`📋 Response data: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success) {
+                    log('✅ Generation successful!');
+                    if (data.output) {
+                        log(`🖼️ Output URL: ${data.output}`);
+                    }
+                } else {
+                    log(`❌ Generation failed: ${data.error || 'Unknown error'}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Generation request failed: ${error.message}`);
+            }
+        }
+        
+        function log(message) {
+            const result = document.getElementById('result');
+            const timestamp = new Date().toLocaleTimeString();
+            result.textContent += `[${timestamp}] ${message}\n`;
+            result.scrollTop = result.scrollHeight;
+        }
+    </script>
+</body>
+</html>

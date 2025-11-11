@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngraveF­ill Pro Clone - Automatic Scrollwork Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #63b3ed 0%, #90cdf4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .controls-panel {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            height: fit-content;
+        }
+
+        .preview-panel {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            min-height: 600px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #63b3ed;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-zone {
+            border: 3px dashed rgba(99, 179, 237, 0.4);
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .upload-zone:hover {
+            border-color: #63b3ed;
+            background: rgba(99, 179, 237, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.dragover {
+            border-color: #90cdf4;
+            background: rgba(144, 205, 244, 0.2);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+
+        .styles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .style-option {
+            padding: 15px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .style-option:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .style-option.selected {
+            border-color: #63b3ed;
+            background: rgba(99, 179, 237, 0.2);
+        }
+
+        .style-option .name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #90cdf4;
+        }
+
+        .style-option .description {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .parameters {
+            display: grid;
+            gap: 20px;
+        }
+
+        .parameter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .parameter label {
+            font-weight: 600;
+            color: #90cdf4;
+        }
+
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-wrapper input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-wrapper input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #63b3ed;
+            cursor: pointer;
+        }
+
+        .range-value {
+            min-width: 50px;
+            padding: 6px 12px;
+            background: rgba(99, 179, 237, 0.3);
+            border-radius: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3182ce 0%, #63b3ed 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(49, 130, 206, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: rgba(255,255,255,0.2);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-area {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-svg {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 500px;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #718096;
+            padding: 40px;
+        }
+
+        .preview-placeholder .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            padding: 12px 20px;
+            background: rgba(49, 130, 206, 0.9);
+            color: white;
+            border-radius: 25px;
+            text-align: center;
+            font-weight: 600;
+            transform: translateY(-100px);
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .status-bar.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .download-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .download-btn.show {
+            display: block;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(56, 161, 105, 0.4);
+        }
+
+        .steps-section {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step .number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3182ce 0%, #63b3ed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5em;
+            margin: 0 auto 15px;
+        }
+
+        .step h4 {
+            color: #90cdf4;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 EngraveFill Pro</h1>
+        <p>Automatically generate intricate, beautiful fill patterns for any shape. Perfect for laser engraving, leather tooling, and digital art.</p>
+    </div>
+
+    <div class="container">
+        <div class="main-grid">
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="section">
+                    <h3>📁 Upload Outline</h3>
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="fileInput" accept="image/*,.svg" multiple="false">
+                        <div class="upload-icon">📤</div>
+                        <div><strong>Drop your outline here</strong></div>
+                        <div style="font-size: 0.9em; opacity: 0.7; margin-top: 8px;">
+                            PNG, JPEG, or SVG with clean outline
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>🎭 Choose Style</h3>
+                    <div class="styles-grid" id="stylesGrid">
+                        <div class="style-option selected" data-style="acanthus">
+                            <div class="name">Acanthus</div>
+                            <div class="description">Classic leaf scrollwork</div>
+                        </div>
+                        <div class="style-option" data-style="western">
+                            <div class="name">Western</div>
+                            <div class="description">Rugged tooling patterns</div>
+                        </div>
+                        <div class="style-option" data-style="baroque">
+                            <div class="name">Baroque</div>
+                            <div class="description">Ornate European style</div>
+                        </div>
+                        <div class="style-option" data-style="victorian">
+                            <div class="name">Victorian</div>
+                            <div class="description">Elegant 19th century</div>
+                        </div>
+                        <div class="style-option" data-style="sheridan">
+                            <div class="name">Sheridan</div>
+                            <div class="description">Traditional leather</div>
+                        </div>
+                        <div class="style-option" data-style="skulls">
+                            <div class="name">Skulls</div>
+                            <div class="description">Gothic & dark themes</div>
+                        </div>
+                        <div class="style-option" data-style="tribal">
+                            <div class="name">Tribal</div>
+                            <div class="description">Bold geometric</div>
+                        </div>
+                        <div class="style-option" data-style="floral">
+                            <div class="name">Floral</div>
+                            <div class="description">Delicate flowers</div>
+                        </div>
+                        <div class="style-option" data-style="celtic">
+                            <div class="name">Celtic</div>
+                            <div class="description">Interwoven knots</div>
+                        </div>
+                        <div class="style-option" data-style="art-nouveau">
+                            <div class="name">Art Nouveau</div>
+                            <div class="description">Flowing organic forms</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>⚙️ Parameters</h3>
+                    <div class="parameters">
+                        <div class="parameter">
+                            <label>Pattern Density</label>
+                            <div class="range-wrapper">
+                                <input type="range" id="density" min="20" max="80" value="50">
+                                <div class="range-value" id="densityValue">50</div>
+                            </div>
+                        </div>
+                        
+                        <div class="parameter">
+                            <label>Detail Level</label>
+                            <div class="range-wrapper">
+                                <input type="range" id="detail" min="1" max="5" value="3">
+                                <div class="range-value" id="detailValue">3</div>
+                            </div>
+                        </div>
+
+                        <div class="parameter">
+                            <label>Pattern Scale</label>
+                            <div class="range-wrapper">
+                                <input type="range" id="scale" min="0.5" max="2.5" step="0.1" value="1.0">
+                                <div class="range-value" id="scaleValue">1.0</div>
+                            </div>
+                        </div>
+
+                        <div class="parameter">
+                            <label>Border Margin</label>
+                            <div class="range-wrapper">
+                                <input type="range" id="margin" min="5" max="25" value="10">
+                                <div class="range-value" id="marginValue">10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn" disabled>
+                    ✨ Generate Scrollwork
+                </button>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <div class="preview-area" id="previewArea">
+                    <div class="preview-placeholder">
+                        <div class="icon">🎨</div>
+                        <h3>Upload an outline to get started</h3>
+                        <p>Your intricate scrollwork will appear here</p>
+                    </div>
+                    
+                    <div class="status-bar" id="statusBar">
+                        Processing your design...
+                    </div>
+                </div>
+
+                <div class="download-section">
+                    <button class="download-btn" id="downloadSVG">📥 Download SVG</button>
+                    <button class="download-btn" id="downloadPNG">📥 Download PNG</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="steps-section">
+            <h2 style="text-align: center; color: #90cdf4; margin-bottom: 10px;">Your Masterpiece in 3 Simple Steps</h2>
+            
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="number">1</div>
+                    <h4>Upload Outline</h4>
+                    <p>Start with a clean PNG, JPEG, or SVG outline of your shape on a solid background.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="number">2</div>
+                    <h4>Choose Style</h4>
+                    <p>Select from dozens of engraving and leatherwork styles to match your vision.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="number">3</div>
+                    <h4>Generate & Download</h4>
+                    <p>Let the app work its magic, then download your amazing design instantly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentOutline = null;
+        let selectedStyle = 'acanthus';
+        let isGenerating = false;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUpload();
+            initializeStyleSelector();
+            initializeParameters();
+            initializeGeneration();
+        });
+
+        function initializeUpload() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+
+            // Click to upload
+            uploadZone.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function initializeStyleSelector() {
+            const styleOptions = document.querySelectorAll('.style-option');
+            
+            styleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove active from all
+                    styleOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add active to clicked
+                    option.classList.add('selected');
+                    selectedStyle = option.dataset.style;
+                    
+                    // Auto-regenerate if outline is loaded
+                    if (currentOutline && !isGenerating) {
+                        debounceGenerate();
+                    }
+                });
+            });
+        }
+
+        function initializeParameters() {
+            const parameters = ['density', 'detail', 'scale', 'margin'];
+            
+            parameters.forEach(param => {
+                const input = document.getElementById(param);
+                const valueDisplay = document.getElementById(param + 'Value');
+                
+                input.addEventListener('input', () => {
+                    let value = input.value;
+                    if (param === 'scale') value = parseFloat(value).toFixed(1);
+                    valueDisplay.textContent = value;
+                    
+                    if (currentOutline && !isGenerating) {
+                        debounceGenerate();
+                    }
+                });
+            });
+        }
+
+        function initializeGeneration() {
+            document.getElementById('generateBtn').addEventListener('click', generateScrollwork);
+            document.getElementById('downloadSVG').addEventListener('click', () => downloadFile('svg'));
+            document.getElementById('downloadPNG').addEventListener('click', () => downloadFile('png'));
+        }
+
+        let generateTimeout;
+        function debounceGenerate() {
+            clearTimeout(generateTimeout);
+            generateTimeout = setTimeout(generateScrollwork, 800);
+        }
+
+        function handleFileUpload(file) {
+            showStatus('Loading outline...', 3000);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentOutline = {
+                    file: file,
+                    data: e.target.result,
+                    name: file.name
+                };
+
+                displayOutline();
+                document.getElementById('generateBtn').disabled = false;
+                showStatus('Outline loaded! Click "Generate Scrollwork" or adjust parameters.', 4000);
+            };
+
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+
+        function displayOutline() {
+            const previewArea = document.getElementById('previewArea');
+            
+            // Clear existing content
+            previewArea.innerHTML = `
+                <canvas id="outlineCanvas" width="800" height="500" style="max-width: 100%; border-radius: 10px; background: white;"></canvas>
+                <div class="status-bar" id="statusBar">Outline loaded - ready to generate</div>
+            `;
+
+            // Display the outline on canvas
+            const canvas = document.getElementById('outlineCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (currentOutline.file.type.startsWith('image/')) {
+                const img = new Image();
+                img.onload = function() {
+                    // Scale image to fit canvas
+                    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                    const scaledWidth = img.width * scale;
+                    const scaledHeight = img.height * scale;
+                    const x = (canvas.width - scaledWidth) / 2;
+                    const y = (canvas.height - scaledHeight) / 2;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                };
+                img.src = currentOutline.data;
+            }
+        }
+
+        function generateScrollwork() {
+            if (!currentOutline || isGenerating) return;
+
+            isGenerating = true;
+            showStatus('🎨 Generating intricate scrollwork...', 0);
+
+            // Get parameters
+            const density = parseInt(document.getElementById('density').value);
+            const detail = parseInt(document.getElementById('detail').value);
+            const scale = parseFloat(document.getElementById('scale').value);
+            const margin = parseInt(document.getElementById('margin').value);
+
+            // Simulate processing time like the real app
+            setTimeout(() => {
+                try {
+                    const scrollworkSVG = createScrollworkPattern(selectedStyle, {
+                        density, detail, scale, margin
+                    });
+                    
+                    displayResult(scrollworkSVG);
+                    showStatus('✨ Scrollwork generated successfully!', 3000);
+                    
+                    // Show download buttons
+                    document.querySelectorAll('.download-btn').forEach(btn => {
+                        btn.classList.add('show');
+                    });
+                    
+                } catch (error) {
+                    showStatus('❌ Error generating scrollwork', 3000);
+                    console.error('Generation error:', error);
+                } finally {
+                    isGenerating = false;
+                }
+            }, 2500); // Realistic processing time
+        }
+
+        function createScrollworkPattern(style, params) {
+            // Create sophisticated scrollwork based on style
+            const stylePatterns = {
+                acanthus: generateAcanthusScrollwork(params),
+                western: generateWesternTooling(params),
+                baroque: generateBaroquePattern(params),
+                victorian: generateVictorianPattern(params),
+                sheridan: generateSheridanLeather(params),
+                skulls: generateSkullPattern(params),
+                tribal: generateTribalPattern(params),
+                floral: generateFloralPattern(params),
+                celtic: generateCelticKnots(params),
+                'art-nouveau': generateArtNouveauPattern(params)
+            };
+
+            return stylePatterns[style] || stylePatterns.acanthus;
+        }
+
+        function generateAcanthusScrollwork(params) {
+            // Generate sophisticated acanthus leaf scrollwork
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#2d3748" stroke-width="1.5" fill="none" stroke-linecap="round">';
+
+            const { density, detail, scale, margin } = params;
+            const bounds = {
+                x: margin,
+                y: margin,
+                width: 800 - margin * 2,
+                height: 500 - margin * 2
+            };
+
+            // Generate main flowing scrollwork stems
+            const mainPaths = generateMainScrollPaths(bounds, density);
+            
+            mainPaths.forEach(path => {
+                svg += `<path d="${path}" stroke-width="${2 * scale}"/>`;
+                
+                // Add acanthus leaves along the path
+                const leaves = generateAcanthusLeaves(path, detail, scale);
+                leaves.forEach(leaf => {
+                    svg += `<path d="${leaf}" stroke-width="${1.2 * scale}" opacity="0.8"/>`;
+                });
+            });
+
+            // Add decorative spirals and curls
+            const spirals = generateDecorativeSpirals(bounds, density * 0.3, scale);
+            spirals.forEach(spiral => {
+                svg += `<path d="${spiral}" stroke-width="${1 * scale}" opacity="0.7"/>`;
+            });
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateWesternTooling(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#8b4513" stroke-width="2" fill="none" stroke-linecap="round">';
+
+            const { density, detail, scale, margin } = params;
+            
+            // Western style basketweave and geometric patterns
+            for (let i = 0; i < density; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 20 * scale;
+                
+                // Basketweave pattern
+                svg += `<path d="M${x},${y} L${x+size},${y} M${x},${y+size/2} L${x+size},${y+size/2} M${x},${y+size} L${x+size},${y+size}" stroke-width="${2*scale}"/>`;
+                svg += `<path d="M${x+size/2},${y} L${x+size/2},${y+size}" stroke-width="${1.5*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateBaroquePattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#4a5568" stroke-width="1.5" fill="none" stroke-linecap="round">';
+
+            const { density, detail, scale, margin } = params;
+            
+            // Elaborate baroque scrollwork
+            for (let i = 0; i < density * 0.8; i++) {
+                const centerX = margin + Math.random() * (800 - margin * 2);
+                const centerY = margin + Math.random() * (500 - margin * 2);
+                const size = 30 * scale;
+                
+                // Complex baroque curve
+                svg += `<path d="M${centerX-size},${centerY} Q${centerX-size/2},${centerY-size} ${centerX},${centerY-size/2} Q${centerX+size/2},${centerY-size} ${centerX+size},${centerY} Q${centerX+size/2},${centerY+size} ${centerX},${centerY+size/2} Q${centerX-size/2},${centerY+size} ${centerX-size},${centerY}" stroke-width="${1.5*scale}"/>`;
+                
+                // Inner decorative elements
+                svg += `<circle cx="${centerX}" cy="${centerY}" r="${size/4}" stroke-width="${1*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateVictorianPattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#2d3748" stroke-width="1.2" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Elegant Victorian scrollwork
+            for (let i = 0; i < density; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 25 * scale;
+                
+                // Victorian flourish
+                svg += `<path d="M${x},${y} Q${x+size/3},${y-size/2} ${x+size/2},${y} Q${x+size*2/3},${y+size/2} ${x+size},${y} Q${x+size*2/3},${y-size/3} ${x+size/2},${y-size/4}" stroke-width="${1.2*scale}"/>`;
+                
+                // Small decorative dots
+                if (Math.random() > 0.6) {
+                    svg += `<circle cx="${x+size/2}" cy="${y}" r="${1*scale}" fill="#2d3748"/>`;
+                }
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateSheridanLeather(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#8b4513" stroke-width="1.8" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Traditional Sheridan leather carving patterns
+            for (let i = 0; i < density * 0.7; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 35 * scale;
+                
+                // Leather carving style leaf
+                svg += `<path d="M${x},${y+size} Q${x-size/3},${y+size/2} ${x},${y} Q${x+size/3},${y+size/2} ${x},${y+size}" stroke-width="${2*scale}"/>`;
+                svg += `<path d="M${x},${y} L${x},${y+size}" stroke-width="${1*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateSkullPattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#2d1b38" stroke-width="2" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Gothic skull-themed patterns
+            for (let i = 0; i < density * 0.5; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 40 * scale;
+                
+                // Stylized skull outline
+                svg += `<path d="M${x},${y} Q${x-size/2},${y-size/3} ${x-size/2},${y+size/3} Q${x-size/2},${y+size} ${x},${y+size*2/3} Q${x+size/2},${y+size} ${x+size/2},${y+size/3} Q${x+size/2},${y-size/3} ${x},${y}" stroke-width="${2*scale}"/>`;
+                
+                // Eye sockets
+                svg += `<circle cx="${x-size/4}" cy="${y+size/4}" r="${size/8}" stroke-width="${1.5*scale}"/>`;
+                svg += `<circle cx="${x+size/4}" cy="${y+size/4}" r="${size/8}" stroke-width="${1.5*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateTribalPattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#000000" stroke-width="3" fill="none" stroke-linejoin="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Bold tribal geometric patterns
+            for (let i = 0; i < density * 0.6; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 30 * scale;
+                
+                // Angular tribal design
+                svg += `<path d="M${x},${y} L${x+size},${y-size/2} L${x+size/2},${y+size} L${x-size/2},${y+size} Z" stroke-width="${3*scale}"/>`;
+                svg += `<path d="M${x},${y} L${x+size/2},${y+size/3} L${x-size/2},${y+size/3} Z" stroke-width="${2*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateFloralPattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#2d5016" stroke-width="1.5" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Delicate floral patterns
+            for (let i = 0; i < density; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 20 * scale;
+                
+                // Flower petals
+                for (let petal = 0; petal < 5; petal++) {
+                    const angle = (petal / 5) * Math.PI * 2;
+                    const petalX = x + Math.cos(angle) * size;
+                    const petalY = y + Math.sin(angle) * size;
+                    svg += `<path d="M${x},${y} Q${x + Math.cos(angle) * size/2 + Math.cos(angle + Math.PI/2) * size/4},${y + Math.sin(angle) * size/2 + Math.sin(angle + Math.PI/2) * size/4} ${petalX},${petalY}" stroke-width="${1*scale}"/>`;
+                }
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateCelticKnots(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#1a365d" stroke-width="2" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Celtic interwoven patterns
+            for (let i = 0; i < density * 0.4; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 50 * scale;
+                
+                // Celtic knot pattern
+                svg += `<path d="M${x},${y} Q${x+size/2},${y-size/2} ${x+size},${y} Q${x+size/2},${y+size/2} ${x},${y+size} Q${x-size/2},${y+size/2} ${x-size},${y} Q${x-size/2},${y-size/2} ${x},${y}" stroke-width="${2.5*scale}"/>`;
+                svg += `<path d="M${x+size/2},${y-size/2} Q${x+size},${y+size/2} ${x-size/2},${y+size/2} Q${x-size},${y-size/2} ${x+size/2},${y-size/2}" stroke-width="${1.5*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        function generateArtNouveauPattern(params) {
+            let svg = '<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect width="800" height="500" fill="white"/>';
+            svg += '<g stroke="#2d3748" stroke-width="1.5" fill="none" stroke-linecap="round">';
+
+            const { density, scale, margin } = params;
+            
+            // Flowing Art Nouveau organic forms
+            for (let i = 0; i < density * 0.8; i++) {
+                const x = margin + Math.random() * (800 - margin * 2);
+                const y = margin + Math.random() * (500 - margin * 2);
+                const size = 40 * scale;
+                
+                // Organic flowing lines
+                svg += `<path d="M${x},${y} Q${x+size/3},${y-size} ${x+size},${y-size/3} Q${x+size*2/3},${y+size/2} ${x+size/2},${y+size} Q${x},${y+size/2} ${x-size/3},${y}" stroke-width="${1.5*scale}"/>`;
+            }
+
+            svg += '</g></svg>';
+            return svg;
+        }
+
+        // Helper functions for more sophisticated pattern generation
+        function generateMainScrollPaths(bounds, density) {
+            const paths = [];
+            const numPaths = Math.floor(density / 15);
+            
+            for (let i = 0; i < numPaths; i++) {
+                const startX = bounds.x + Math.random() * bounds.width;
+                const startY = bounds.y + Math.random() * bounds.height;
+                
+                let path = `M${startX},${startY}`;
+                let currentX = startX;
+                let currentY = startY;
+                
+                // Generate flowing path with multiple curves
+                for (let j = 0; j < 5; j++) {
+                    const controlX1 = currentX + (Math.random() - 0.5) * 100;
+                    const controlY1 = currentY + (Math.random() - 0.5) * 100;
+                    const controlX2 = currentX + (Math.random() - 0.5) * 100;
+                    const controlY2 = currentY + (Math.random() - 0.5) * 100;
+                    const endX = Math.max(bounds.x, Math.min(bounds.x + bounds.width, currentX + (Math.random() - 0.5) * 150));
+                    const endY = Math.max(bounds.y, Math.min(bounds.y + bounds.height, currentY + (Math.random() - 0.5) * 150));
+                    
+                    path += ` C${controlX1},${controlY1} ${controlX2},${controlY2} ${endX},${endY}`;
+                    currentX = endX;
+                    currentY = endY;
+                }
+                
+                paths.push(path);
+            }
+            
+            return paths;
+        }
+
+        function generateAcanthusLeaves(mainPath, detail, scale) {
+            // Generate leaves along the main path
+            const leaves = [];
+            const leafCount = detail * 3;
+            
+            for (let i = 0; i < leafCount; i++) {
+                const t = i / leafCount;
+                // Simplified: generate leaves at regular intervals
+                const leafSize = 15 * scale;
+                const x = 100 + t * 600; // Simplified positioning
+                const y = 250 + Math.sin(t * Math.PI * 4) * 50;
+                
+                const leaf = `M${x},${y} Q${x-leafSize},${y-leafSize/2} ${x-leafSize/2},${y-leafSize} Q${x},${y-leafSize*1.5} ${x+leafSize/2},${y-leafSize} Q${x+leafSize},${y-leafSize/2} ${x},${y}`;
+                leaves.push(leaf);
+            }
+            
+            return leaves;
+        }
+
+        function generateDecorativeSpirals(bounds, count, scale) {
+            const spirals = [];
+            
+            for (let i = 0; i < count; i++) {
+                const centerX = bounds.x + Math.random() * bounds.width;
+                const centerY = bounds.y + Math.random() * bounds.height;
+                const radius = 20 * scale;
+                
+                let spiral = `M${centerX + radius},${centerY}`;
+                
+                // Create spiral path
+                for (let angle = 0; angle < Math.PI * 4; angle += 0.3) {
+                    const spiralRadius = radius * (1 - angle / (Math.PI * 4));
+                    const x = centerX + Math.cos(angle) * spiralRadius;
+                    const y = centerY + Math.sin(angle) * spiralRadius;
+                    spiral += ` L${x},${y}`;
+                }
+                
+                spirals.push(spiral);
+            }
+            
+            return spirals;
+        }
+
+        function displayResult(svgContent) {
+            const previewArea = document.getElementById('previewArea');
+            previewArea.innerHTML = svgContent + '<div class="status-bar" id="statusBar">✨ Scrollwork generated successfully!</div>';
+        }
+
+        function showStatus(message, duration) {
+            const statusBar = document.getElementById('statusBar');
+            if (statusBar) {
+                statusBar.textContent = message;
+                statusBar.classList.add('show');
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        statusBar.classList.remove('show');
+                    }, duration);
+                }
+            }
+        }
+
+        function downloadFile(format) {
+            const previewArea = document.getElementById('previewArea');
+            const svgElement = previewArea.querySelector('svg');
+            
+            if (!svgElement) return;
+            
+            if (format === 'svg') {
+                const svgData = new XMLSerializer().serializeToString(svgElement);
+                const blob = new Blob([svgData], {type: 'image/svg+xml'});
+                downloadBlob(blob, `scrollwork-${selectedStyle}.svg`);
+            } else if (format === 'png') {
+                // Convert SVG to PNG
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = 800;
+                    canvas.height = 500;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    canvas.toBlob(blob => {
+                        downloadBlob(blob, `scrollwork-${selectedStyle}.png`);
+                    });
+                };
+                
+                const svgData = new XMLSerializer().serializeToString(svgElement);
+                const blob = new Blob([svgData], {type: 'image/svg+xml'});
+                img.src = URL.createObjectURL(blob);
+            }
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus(`📥 ${filename} downloaded!`, 2000);
+        }
+    </script>
+</body>
+</html>

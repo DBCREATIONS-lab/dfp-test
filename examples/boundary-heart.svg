@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Heart shape boundary -->
+  <path d="M 200 350 C 200 350 50 250 50 150 C 50 100 75 75 100 75 C 125 75 150 90 200 150 C 250 90 275 75 300 75 C 325 75 350 100 350 150 C 350 250 200 350 200 350 Z" 
+        fill="none" 
+        stroke="#333" 
+        stroke-width="2"/>
+</svg>

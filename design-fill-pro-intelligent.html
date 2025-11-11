@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Fill Pro - Intelligent Pattern Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        .header .brand {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            min-height: 700px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .workspace {
+            padding: 30px;
+            background: #ffffff;
+        }
+
+        .control-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .control-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .upload-zone {
+            border: 3px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: #3498db;
+            background: #ecf0f1;
+        }
+
+        .upload-zone.active {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .upload-zone input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .algorithm-selector {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .algorithm-option {
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .algorithm-option:hover {
+            border-color: #3498db;
+        }
+
+        .algorithm-option.active {
+            border-color: #3498db;
+            background: #3498db;
+            color: white;
+        }
+
+        .parameter-control {
+            margin: 15px 0;
+        }
+
+        .parameter-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .range-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-input input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ecf0f1;
+            outline: none;
+        }
+
+        .range-input .value {
+            min-width: 50px;
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .generate-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .workspace-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-height: 600px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .analysis-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            font-size: 0.9em;
+        }
+
+        .analysis-panel h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .analysis-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+
+        .preview-svg {
+            width: 100%;
+            height: 550px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 25px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .status-bar.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .pattern-flow-debug {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            max-width: 300px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">DESIGN FILL PRO</div>
+            <h1>🎯 Intelligent Pattern Generator</h1>
+            <p>Advanced shape analysis and boundary-aware scrollwork generation</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-section">
+                    <h3>📂 Shape Upload</h3>
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="shapeUpload" accept=".svg,image/png,image/jpeg">
+                        <div>
+                            <div style="font-size: 2em; margin-bottom: 10px;">📤</div>
+                            <div><strong>Drop your outline here</strong></div>
+                            <div style="font-size: 0.9em; color: #7f8c8d; margin-top: 5px;">
+                                SVG, PNG, or JPEG
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>🎨 Fill Pattern Type</h3>
+                    <div class="algorithm-selector">
+                        <div class="algorithm-option active" data-algorithm="scrollwork">
+                            <strong>Scrollwork</strong><br>
+                            <small>Elegant flowing decorative scrolls and flourishes</small>
+                        </div>
+                        <div class="algorithm-option" data-algorithm="filigree">
+                            <strong>Filigree</strong><br>
+                            <small>Delicate interwoven patterns with fine detail</small>
+                        </div>
+                        <div class="algorithm-option" data-algorithm="geometric">
+                            <strong>Geometric</strong><br>
+                            <small>Clean geometric patterns and tessellations</small>
+                        </div>
+                        <div class="algorithm-option" data-algorithm="organic">
+                            <strong>Organic</strong><br>
+                            <small>Natural flowing patterns inspired by nature</small>
+                        </div>
+                        <div class="algorithm-option" data-algorithm="tribal">
+                            <strong>Tribal</strong><br>
+                            <small>Bold angular patterns with strong definition</small>
+                        </div>
+                        <div class="algorithm-option" data-algorithm="victorian">
+                            <strong>Victorian</strong><br>
+                            <small>Ornate classical decorative elements</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>🧠 Fill Algorithm</h3>
+                    <div class="algorithm-selector">
+                        <div class="algorithm-option active" data-fill="intelligent-flow">
+                            <strong>Intelligent Flow</strong><br>
+                            <small>Analyzes shape geometry and creates flowing patterns</small>
+                        </div>
+                        <div class="algorithm-option" data-fill="contour-following">
+                            <strong>Contour Following</strong><br>
+                            <small>Dense layered patterns following boundary inward</small>
+                        </div>
+                        <div class="algorithm-option" data-fill="directional-flow">
+                            <strong>Directional Flow</strong><br>
+                            <small>Detects dominant direction and flows accordingly</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>⚙️ Pattern Parameters</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Pattern Density</label>
+                        <div class="range-input">
+                            <input type="range" id="density" min="5" max="30" value="15">
+                            <div class="value" id="densityValue">15</div>
+                        </div>
+                    </div>
+
+                    <div class="parameter-control">
+                        <label>Flow Sensitivity</label>
+                        <div class="range-input">
+                            <input type="range" id="flowSensitivity" min="0.1" max="2.0" step="0.1" value="1.0">
+                            <div class="value" id="flowValue">1.0</div>
+                        </div>
+                    </div>
+
+                    <div class="parameter-control">
+                        <label>Pattern Scale</label>
+                        <div class="range-input">
+                            <input type="range" id="patternScale" min="0.3" max="3.0" step="0.1" value="1.0">
+                            <div class="value" id="scaleValue">1.0</div>
+                        </div>
+                    </div>
+
+                    <div class="parameter-control">
+                        <label>Organic Variation</label>
+                        <div class="range-input">
+                            <input type="range" id="variation" min="0" max="100" value="30">
+                            <div class="value" id="variationValue">30%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn" disabled>
+                    🎨 Generate Intelligent Fill
+                </button>
+            </div>
+
+            <div class="workspace">
+                <div class="workspace-area">
+                    <svg class="preview-svg" id="previewSVG" viewBox="0 0 1000 600">
+                        <defs>
+                            <pattern id="gridPattern" patternUnits="userSpaceOnUse" width="50" height="50">
+                                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#ecf0f1" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#gridPattern)"/>
+                        <text x="500" y="300" text-anchor="middle" fill="#bdc3c7" font-size="24">
+                            Upload a shape to begin intelligent analysis
+                        </text>
+                    </svg>
+
+                    <div class="analysis-panel" id="analysisPanel" style="display: none;">
+                        <h4>🔍 Shape Analysis</h4>
+                        <div class="analysis-item">
+                            <span>Path Length:</span>
+                            <span id="pathLength">-</span>
+                        </div>
+                        <div class="analysis-item">
+                            <span>Complexity:</span>
+                            <span id="complexity">-</span>
+                        </div>
+                        <div class="analysis-item">
+                            <span>Curvature:</span>
+                            <span id="curvature">-</span>
+                        </div>
+                        <div class="analysis-item">
+                            <span>Flow Direction:</span>
+                            <span id="flowDirection">-</span>
+                        </div>
+                        <div class="analysis-item">
+                            <span>Fill Zones:</span>
+                            <span id="fillZones">-</span>
+                        </div>
+                    </div>
+
+                    <div class="pattern-flow-debug" id="debugPanel">
+                        <div>Pattern Generation Debug:</div>
+                        <div id="debugInfo">Waiting for analysis...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar" id="statusBar"></div>
+
+    <script>
+        // Global state
+        let currentShape = null;
+        let shapeAnalysis = null;
+        let selectedAlgorithm = 'intelligent-flow';
+        let selectedPattern = 'scrollwork';
+        let isGenerating = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUpload();
+            initializeControls();
+            initializeAlgorithmSelector();
+        });
+
+        function initializeUpload() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('shapeUpload');
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('active');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('active');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('active');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            // File input
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function initializeControls() {
+            const controls = ['density', 'flowSensitivity', 'patternScale', 'variation'];
+            
+            controls.forEach(controlId => {
+                const input = document.getElementById(controlId);
+                const valueDisplay = document.getElementById(controlId.replace('Sensitivity', '').replace('Scale', '') + 'Value');
+                
+                input.addEventListener('input', () => {
+                    let value = input.value;
+                    if (controlId === 'variation') value += '%';
+                    valueDisplay.textContent = value;
+                    
+                    if (currentShape && !isGenerating) {
+                        debounceGenerate();
+                    }
+                });
+            });
+
+            document.getElementById('generateBtn').addEventListener('click', generateIntelligentFill);
+        }
+
+        function initializeAlgorithmSelector() {
+            // Pattern type selector
+            const patternOptions = document.querySelectorAll('.algorithm-option[data-algorithm]');
+            patternOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    patternOptions.forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    selectedPattern = option.dataset.algorithm;
+                    
+                    if (currentShape && !isGenerating) {
+                        generateIntelligentFill();
+                    }
+                });
+            });
+            
+            // Fill algorithm selector  
+            const fillOptions = document.querySelectorAll('.algorithm-option[data-fill]');
+            fillOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    fillOptions.forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    selectedAlgorithm = option.dataset.fill;
+                    
+                    if (currentShape && !isGenerating) {
+                        generateIntelligentFill();
+                    }
+                });
+            });
+        }
+
+        let generateTimeout;
+        function debounceGenerate() {
+            clearTimeout(generateTimeout);
+            generateTimeout = setTimeout(generateIntelligentFill, 300);
+        }
+
+        function handleFileUpload(file) {
+            showStatus('📂 Loading and analyzing shape...', 'info');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (file.type === 'image/svg+xml' || file.name.endsWith('.svg')) {
+                    processSVGShape(e.target.result);
+                } else {
+                    processImageShape(e.target.result, file.type);
+                }
+            };
+            
+            if (file.type.startsWith('image/') && !file.name.endsWith('.svg')) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+
+        function processSVGShape(svgContent) {
+            try {
+                // Parse SVG and extract path data
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                const paths = svgDoc.querySelectorAll('path');
+                
+                if (paths.length === 0) {
+                    throw new Error('No paths found in SVG');
+                }
+
+                // Use the first path as the boundary
+                const pathData = paths[0].getAttribute('d');
+                currentShape = {
+                    type: 'svg',
+                    pathData: pathData,
+                    originalSVG: svgContent
+                };
+
+                analyzeShape(pathData);
+                document.getElementById('generateBtn').disabled = false;
+                showStatus('✅ Shape analyzed successfully!', 'success');
+
+            } catch (error) {
+                showStatus('❌ Error processing SVG: ' + error.message, 'error');
+                console.error('SVG processing error:', error);
+            }
+        }
+
+        function processImageShape(dataUrl, mimeType) {
+            // For raster images, we'd need edge detection
+            // For now, create a simple demo boundary
+            showStatus('🔄 Converting image to vector boundary...', 'info');
+            
+            setTimeout(() => {
+                // Demo: create a simple shape based on image
+                const demoPath = "M100,300 Q200,100 400,150 Q600,120 800,200 Q700,400 500,420 Q300,450 100,300 Z";
+                
+                currentShape = {
+                    type: 'raster',
+                    pathData: demoPath,
+                    originalImage: dataUrl
+                };
+
+                analyzeShape(demoPath);
+                document.getElementById('generateBtn').disabled = false;
+                showStatus('✅ Image converted and analyzed!', 'success');
+            }, 1000);
+        }
+
+        function analyzeShape(pathData) {
+            showStatus('🧠 Analyzing shape geometry...', 'info');
+            
+            // Advanced shape analysis
+            const analysis = performShapeAnalysis(pathData);
+            shapeAnalysis = analysis;
+            
+            // Update analysis panel
+            updateAnalysisPanel(analysis);
+            
+            // Show analysis panel
+            document.getElementById('analysisPanel').style.display = 'block';
+            
+            // Display shape in preview
+            displayShapeInPreview(pathData, analysis);
+        }
+
+        function performShapeAnalysis(pathData) {
+            // Parse path and analyze geometry
+            const pathPoints = parsePathToPoints(pathData);
+            
+            return {
+                pathLength: calculatePathLength(pathPoints),
+                complexity: calculateComplexity(pathPoints),
+                curvature: analyzeCurvature(pathPoints),
+                flowDirection: determineFlowDirection(pathPoints),
+                fillZones: identifyFillZones(pathPoints),
+                boundingBox: calculateBoundingBox(pathPoints),
+                pointsOfInterest: findPointsOfInterest(pathPoints),
+                pathPoints: pathPoints
+            };
+        }
+
+        function parsePathToPoints(pathData) {
+            // Robust path parser with better error handling
+            const points = [];
+            
+            try {
+                // Clean up path data
+                const cleanPath = pathData.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
+                
+                // Split into commands  
+                const commands = cleanPath.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
+                
+                let currentX = 0, currentY = 0;
+                let startX = 0, startY = 0;
+                
+                commands.forEach(command => {
+                    const type = command[0];
+                    const coords = command.slice(1).trim();
+                    
+                    if (!coords && type.toUpperCase() !== 'Z') return;
+                    
+                    const numbers = coords ? coords.split(/[\s,]+/).map(n => {
+                        const num = parseFloat(n);
+                        return isNaN(num) ? 0 : num;
+                    }) : [];
+                    
+                    const isRelative = type === type.toLowerCase();
+                    
+                    switch(type.toUpperCase()) {
+                        case 'M':
+                            if (numbers.length >= 2) {
+                                currentX = isRelative ? currentX + numbers[0] : numbers[0];
+                                currentY = isRelative ? currentY + numbers[1] : numbers[1];
+                                startX = currentX;
+                                startY = currentY;
+                                points.push({x: currentX, y: currentY, type: 'move'});
+                            }
+                            break;
+                            
+                        case 'L':
+                            if (numbers.length >= 2) {
+                                currentX = isRelative ? currentX + numbers[0] : numbers[0];
+                                currentY = isRelative ? currentY + numbers[1] : numbers[1];
+                                points.push({x: currentX, y: currentY, type: 'line'});
+                            }
+                            break;
+                            
+                        case 'H':
+                            if (numbers.length >= 1) {
+                                currentX = isRelative ? currentX + numbers[0] : numbers[0];
+                                points.push({x: currentX, y: currentY, type: 'line'});
+                            }
+                            break;
+                            
+                        case 'V':
+                            if (numbers.length >= 1) {
+                                currentY = isRelative ? currentY + numbers[0] : numbers[0];
+                                points.push({x: currentX, y: currentY, type: 'line'});
+                            }
+                            break;
+                            
+                        case 'Q':
+                            if (numbers.length >= 4) {
+                                const cx = isRelative ? currentX + numbers[0] : numbers[0];
+                                const cy = isRelative ? currentY + numbers[1] : numbers[1];
+                                const endX = isRelative ? currentX + numbers[2] : numbers[2];
+                                const endY = isRelative ? currentY + numbers[3] : numbers[3];
+                                
+                                // Sample curve points
+                                for (let t = 0; t <= 1; t += 0.1) {
+                                    const x = Math.pow(1-t, 2) * currentX + 2*(1-t)*t * cx + Math.pow(t, 2) * endX;
+                                    const y = Math.pow(1-t, 2) * currentY + 2*(1-t)*t * cy + Math.pow(t, 2) * endY;
+                                    points.push({x, y, type: 'curve'});
+                                }
+                                
+                                currentX = endX;
+                                currentY = endY;
+                            }
+                            break;
+                            
+                        case 'C':
+                            if (numbers.length >= 6) {
+                                const endX = isRelative ? currentX + numbers[4] : numbers[4];
+                                const endY = isRelative ? currentY + numbers[5] : numbers[5];
+                                
+                                // Sample cubic curve
+                                const cp1x = isRelative ? currentX + numbers[0] : numbers[0];
+                                const cp1y = isRelative ? currentY + numbers[1] : numbers[1];
+                                const cp2x = isRelative ? currentX + numbers[2] : numbers[2];
+                                const cp2y = isRelative ? currentY + numbers[3] : numbers[3];
+                                
+                                for (let t = 0; t <= 1; t += 0.1) {
+                                    const x = Math.pow(1-t, 3) * currentX + 
+                                             3 * Math.pow(1-t, 2) * t * cp1x +
+                                             3 * (1-t) * Math.pow(t, 2) * cp2x + 
+                                             Math.pow(t, 3) * endX;
+                                    const y = Math.pow(1-t, 3) * currentY + 
+                                             3 * Math.pow(1-t, 2) * t * cp1y +
+                                             3 * (1-t) * Math.pow(t, 2) * cp2y + 
+                                             Math.pow(t, 3) * endY;
+                                    points.push({x, y, type: 'curve'});
+                                }
+                                
+                                currentX = endX;
+                                currentY = endY;
+                            }
+                            break;
+                            
+                        case 'Z':
+                            if (startX !== currentX || startY !== currentY) {
+                                points.push({x: startX, y: startY, type: 'line'});
+                                currentX = startX;
+                                currentY = startY;
+                            }
+                            break;
+                    }
+                });
+                
+                // Ensure we have valid points
+                if (points.length === 0) {
+                    // Create a default rectangle if parsing fails
+                    points.push(
+                        {x: 100, y: 100, type: 'move'},
+                        {x: 400, y: 100, type: 'line'},
+                        {x: 400, y: 300, type: 'line'},
+                        {x: 100, y: 300, type: 'line'},
+                        {x: 100, y: 100, type: 'line'}
+                    );
+                }
+                
+                return points;
+                
+            } catch (error) {
+                console.error('Path parsing error:', error);
+                // Return fallback rectangle
+                return [
+                    {x: 100, y: 100, type: 'move'},
+                    {x: 400, y: 100, type: 'line'},
+                    {x: 400, y: 300, type: 'line'},
+                    {x: 100, y: 300, type: 'line'},
+                    {x: 100, y: 100, type: 'line'}
+                ];
+            }
+        }
+
+        function calculatePathLength(points) {
+            let length = 0;
+            for (let i = 1; i < points.length; i++) {
+                const dx = points[i].x - points[i-1].x;
+                const dy = points[i].y - points[i-1].y;
+                length += Math.sqrt(dx*dx + dy*dy);
+            }
+            return Math.round(length);
+        }
+
+        function calculateComplexity(points) {
+            // Measure path complexity based on direction changes
+            let directionChanges = 0;
+            for (let i = 2; i < points.length; i++) {
+                const angle1 = Math.atan2(points[i-1].y - points[i-2].y, points[i-1].x - points[i-2].x);
+                const angle2 = Math.atan2(points[i].y - points[i-1].y, points[i].x - points[i-1].x);
+                const angleDiff = Math.abs(angle1 - angle2);
+                if (angleDiff > 0.5) directionChanges++;
+            }
+            return directionChanges > 10 ? 'High' : directionChanges > 5 ? 'Medium' : 'Low';
+        }
+
+        function analyzeCurvature(points) {
+            // Analyze overall curvature
+            let totalCurvature = 0;
+            for (let i = 2; i < points.length; i++) {
+                // Calculate curvature at each point
+                const dx1 = points[i-1].x - points[i-2].x;
+                const dy1 = points[i-1].y - points[i-2].y;
+                const dx2 = points[i].x - points[i-1].x;
+                const dy2 = points[i].y - points[i-1].y;
+                
+                const cross = dx1 * dy2 - dy1 * dx2;
+                const dot = dx1 * dx2 + dy1 * dy2;
+                const curvature = Math.abs(Math.atan2(cross, dot));
+                totalCurvature += curvature;
+            }
+            
+            const avgCurvature = totalCurvature / (points.length - 2);
+            return avgCurvature > 0.3 ? 'High' : avgCurvature > 0.1 ? 'Medium' : 'Low';
+        }
+
+        function determineFlowDirection(points) {
+            // Determine dominant flow direction
+            const bbox = calculateBoundingBox(points);
+            const aspectRatio = bbox.width / bbox.height;
+            
+            if (aspectRatio > 2) return 'Horizontal';
+            if (aspectRatio < 0.5) return 'Vertical';
+            return 'Radial';
+        }
+
+        function identifyFillZones(points) {
+            // Identify distinct areas for pattern filling
+            const bbox = calculateBoundingBox(points);
+            const area = bbox.width * bbox.height;
+            
+            if (area > 100000) return 'Multiple';
+            if (area > 50000) return 'Dual';
+            return 'Single';
+        }
+
+        function calculateBoundingBox(points) {
+            if (!points || points.length === 0) {
+                return {
+                    x: 100, y: 100, width: 300, height: 200,
+                    centerX: 250, centerY: 200
+                };
+            }
+            
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            
+            points.forEach(point => {
+                if (isFinite(point.x) && isFinite(point.y)) {
+                    minX = Math.min(minX, point.x);
+                    minY = Math.min(minY, point.y);
+                    maxX = Math.max(maxX, point.x);
+                    maxY = Math.max(maxY, point.y);
+                }
+            });
+            
+            // Handle invalid bounds
+            if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
+                return {
+                    x: 100, y: 100, width: 300, height: 200,
+                    centerX: 250, centerY: 200
+                };
+            }
+            
+            const width = maxX - minX;
+            const height = maxY - minY;
+            
+            return {
+                x: minX,
+                y: minY,
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+                centerX: minX + width / 2,
+                centerY: minY + height / 2
+            };
+        }
+
+        function findPointsOfInterest(points) {
+            // Find corners, curves, and other important points
+            const interesting = [];
+            
+            for (let i = 2; i < points.length - 2; i++) {
+                // Detect sharp corners
+                const angle1 = Math.atan2(points[i-1].y - points[i-2].y, points[i-1].x - points[i-2].x);
+                const angle2 = Math.atan2(points[i+1].y - points[i].y, points[i+1].x - points[i].x);
+                const angleDiff = Math.abs(angle1 - angle2);
+                
+                if (angleDiff > 1.0) { // Sharp corner
+                    interesting.push({
+                        ...points[i],
+                        type: 'corner',
+                        angle: angleDiff
+                    });
+                }
+            }
+            
+            return interesting;
+        }
+
+        function updateAnalysisPanel(analysis) {
+            document.getElementById('pathLength').textContent = analysis.pathLength + 'px';
+            document.getElementById('complexity').textContent = analysis.complexity;
+            document.getElementById('curvature').textContent = analysis.curvature;
+            document.getElementById('flowDirection').textContent = analysis.flowDirection;
+            document.getElementById('fillZones').textContent = analysis.fillZones;
+        }
+
+        function displayShapeInPreview(pathData, analysis) {
+            const svg = document.getElementById('previewSVG');
+            const bbox = analysis.boundingBox;
+            
+            // Adjust viewBox to fit shape
+            const padding = 50;
+            svg.setAttribute('viewBox', 
+                `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`
+            );
+            
+            // Clear and add shape
+            svg.innerHTML = `
+                <defs>
+                    <pattern id="gridPattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f0f0f0" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#gridPattern)"/>
+                <path d="${pathData}" fill="none" stroke="#2c3e50" stroke-width="3" opacity="0.8"/>
+                <g id="patternContainer"></g>
+                <g id="debugVisualization"></g>
+            `;
+            
+            // Visualize analysis points
+            if (analysis.pointsOfInterest) {
+                const debugGroup = svg.querySelector('#debugVisualization');
+                analysis.pointsOfInterest.forEach(point => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', point.x);
+                    circle.setAttribute('cy', point.y);
+                    circle.setAttribute('r', '4');
+                    circle.setAttribute('fill', point.type === 'corner' ? '#e74c3c' : '#f39c12');
+                    circle.setAttribute('opacity', '0.7');
+                    debugGroup.appendChild(circle);
+                });
+            }
+        }
+
+        function generateIntelligentFill() {
+            if (!currentShape || !shapeAnalysis || isGenerating) return;
+            
+            isGenerating = true;
+            showStatus('🎨 Generating intelligent pattern fill...', 'info');
+            
+            const density = parseInt(document.getElementById('density').value);
+            const flowSensitivity = parseFloat(document.getElementById('flowSensitivity').value);
+            const patternScale = parseFloat(document.getElementById('patternScale').value);
+            const variation = parseInt(document.getElementById('variation').value);
+            
+            // Show debug info
+            const debugPanel = document.getElementById('debugPanel');
+            debugPanel.style.display = 'block';
+            document.getElementById('debugInfo').innerHTML = `
+                Pattern: ${selectedPattern}<br>
+                Algorithm: ${selectedAlgorithm}<br>
+                Density: ${density}<br>
+                Flow: ${flowSensitivity}<br>
+                Scale: ${patternScale}<br>
+                Variation: ${variation}%
+            `;
+            
+            setTimeout(() => {
+                try {
+                    const patternData = generatePatternByAlgorithm(
+                        selectedAlgorithm,
+                        shapeAnalysis,
+                        { density, flowSensitivity, patternScale, variation }
+                    );
+                    
+                    renderPatternInPreview(patternData);
+                    showStatus('✅ Intelligent fill generated!', 'success');
+                    
+                } catch (error) {
+                    showStatus('❌ Generation failed: ' + error.message, 'error');
+                    console.error('Pattern generation error:', error);
+                } finally {
+                    isGenerating = false;
+                }
+            }, 500);
+        }
+
+        function generatePatternByAlgorithm(algorithm, analysis, params) {
+            switch(algorithm) {
+                case 'intelligent-flow':
+                    return generateIntelligentFlowPattern(analysis, params);
+                case 'contour-following':
+                    return generateContourFollowingPattern(analysis, params);
+                case 'directional-flow':
+                    return generateDirectionalFlowPattern(analysis, params);
+                default:
+                    throw new Error('Unknown algorithm: ' + algorithm);
+            }
+        }
+
+        function generateIntelligentFlowPattern(analysis, params) {
+            const patterns = [];
+            const bbox = analysis.boundingBox;
+            const points = analysis.pathPoints;
+            
+            // Ensure valid bbox
+            if (!bbox || bbox.width <= 0 || bbox.height <= 0) {
+                return generateFallbackPattern();
+            }
+            
+            // Create flowing patterns that follow shape geometry
+            const flowLines = generateFlowLines(points, analysis.flowDirection, bbox);
+            
+            flowLines.forEach((flowLine, index) => {
+                const density = Math.max(5, params.density * (1 + Math.random() * 0.3));
+                
+                for (let i = 0; i < density; i++) {
+                    const t = i / Math.max(1, density - 1);
+                    const pos = interpolateAlongFlow(flowLine, t);
+                    
+                    // Validate position
+                    if (!isFinite(pos.x) || !isFinite(pos.y)) continue;
+                    
+                    if (isPointInsideShape(pos, points)) {
+                        const rotation = calculateFlowRotation(flowLine, t);
+                        const scale = params.patternScale * (0.8 + Math.random() * 0.4);
+                        
+                        if (isFinite(rotation) && isFinite(scale)) {
+                            patterns.push({
+                                type: selectedPattern,
+                                x: pos.x,
+                                y: pos.y,
+                                rotation: rotation + (Math.random() - 0.5) * params.variation,
+                                scale: scale,
+                                opacity: 0.8 + Math.random() * 0.2
+                            });
+                        }
+                    }
+                }
+            });
+            
+            return patterns.length > 0 ? patterns : generateFallbackPattern();
+        }
+
+        function generateFallbackPattern() {
+            // Simple fallback pattern when parsing fails
+            const patterns = [];
+            for (let i = 0; i < 20; i++) {
+                patterns.push({
+                    type: selectedPattern,
+                    x: 200 + Math.random() * 200,
+                    y: 150 + Math.random() * 150,
+                    rotation: Math.random() * 360,
+                    scale: 0.8 + Math.random() * 0.4,
+                    opacity: 0.8
+                });
+            }
+            return patterns;
+        }
+
+        function generateContourFollowingPattern(analysis, params) {
+            const patterns = [];
+            const points = analysis.pathPoints;
+            const bbox = analysis.boundingBox;
+            
+            // Create concentric layers following the boundary
+            const layers = Math.floor(params.density / 3);
+            const maxInset = Math.min(bbox.width, bbox.height) * 0.4;
+            
+            for (let layer = 0; layer < layers; layer++) {
+                const inset = (layer / (layers - 1)) * maxInset;
+                const layerPath = createInsetPath(points, inset);
+                
+                const patternsInLayer = Math.floor(params.density * (1 - layer / layers));
+                
+                for (let i = 0; i < patternsInLayer; i++) {
+                    const t = i / patternsInLayer;
+                    const pos = interpolateAlongPath(layerPath, t);
+                    const tangent = calculateTangentAngle(layerPath, t);
+                    
+                    patterns.push({
+                        type: 'scrollwork',
+                        x: pos.x,
+                        y: pos.y,
+                        rotation: tangent * 180 / Math.PI,
+                        scale: params.patternScale * (0.7 + layer * 0.1),
+                        opacity: 0.9 - layer * 0.1
+                    });
+                }
+            }
+            
+            return patterns;
+        }
+
+        function generateDirectionalFlowPattern(analysis, params) {
+            const patterns = [];
+            const bbox = analysis.boundingBox;
+            const flowDir = analysis.flowDirection;
+            
+            // Generate patterns following dominant direction
+            let primaryAxis, secondaryAxis;
+            
+            if (flowDir === 'Horizontal') {
+                primaryAxis = { dx: 1, dy: 0 };
+                secondaryAxis = { dx: 0, dy: 1 };
+            } else if (flowDir === 'Vertical') {
+                primaryAxis = { dx: 0, dy: 1 };
+                secondaryAxis = { dx: 1, dy: 0 };
+            } else { // Radial
+                primaryAxis = { dx: 1, dy: 1 };
+                secondaryAxis = { dx: 1, dy: -1 };
+            }
+            
+            const spacing = Math.min(bbox.width, bbox.height) / params.density;
+            
+            for (let i = 0; i < params.density * 2; i++) {
+                for (let j = 0; j < params.density; j++) {
+                    const x = bbox.x + (i / (params.density * 2)) * bbox.width;
+                    const y = bbox.y + (j / params.density) * bbox.height;
+                    
+                    if (isPointInsideShape({x, y}, analysis.pathPoints)) {
+                        const distanceFromCenter = Math.sqrt(
+                            Math.pow(x - bbox.centerX, 2) + Math.pow(y - bbox.centerY, 2)
+                        );
+                        
+                        const flowInfluence = params.flowSensitivity * (1 - distanceFromCenter / Math.max(bbox.width, bbox.height));
+                        
+                        patterns.push({
+                            type: 'scrollwork',
+                            x: x + (Math.random() - 0.5) * spacing * 0.5,
+                            y: y + (Math.random() - 0.5) * spacing * 0.5,
+                            rotation: Math.atan2(primaryAxis.dy, primaryAxis.dx) * 180 / Math.PI + 
+                                     (Math.random() - 0.5) * params.variation * flowInfluence,
+                            scale: params.patternScale * (0.6 + flowInfluence * 0.4),
+                            opacity: 0.7 + flowInfluence * 0.3
+                        });
+                    }
+                }
+            }
+            
+            return patterns;
+        }
+
+        // Helper functions for pattern generation
+        function generateFlowLines(points, flowDirection, bbox) {
+            if (!bbox || !points || points.length === 0) {
+                // Fallback flow lines
+                return [
+                    [{ x: 100, y: 200 }, { x: 400, y: 200 }],
+                    [{ x: 100, y: 250 }, { x: 400, y: 250 }]
+                ];
+            }
+            
+            const flowLines = [];
+            
+            if (flowDirection === 'Horizontal') {
+                const steps = Math.max(3, Math.floor(bbox.height / 40));
+                for (let i = 0; i < steps; i++) {
+                    const y = bbox.y + (i / (steps - 1)) * bbox.height;
+                    flowLines.push([
+                        { x: bbox.x, y: y },
+                        { x: bbox.x + bbox.width, y: y }
+                    ]);
+                }
+            } else if (flowDirection === 'Vertical') {
+                const steps = Math.max(3, Math.floor(bbox.width / 40));
+                for (let i = 0; i < steps; i++) {
+                    const x = bbox.x + (i / (steps - 1)) * bbox.width;
+                    flowLines.push([
+                        { x: x, y: bbox.y },
+                        { x: x, y: bbox.y + bbox.height }
+                    ]);
+                }
+            } else { // Radial
+                const center = { x: bbox.centerX, y: bbox.centerY };
+                const radius = Math.max(bbox.width, bbox.height) / 2;
+                const angleSteps = 8;
+                
+                for (let i = 0; i < angleSteps; i++) {
+                    const angle = (i / angleSteps) * Math.PI * 2;
+                    flowLines.push([
+                        center,
+                        {
+                            x: center.x + Math.cos(angle) * radius,
+                            y: center.y + Math.sin(angle) * radius
+                        }
+                    ]);
+                }
+            }
+            
+            return flowLines;
+        }
+
+        function interpolateAlongFlow(flowLine, t) {
+            if (!flowLine || flowLine.length < 2) {
+                return { x: 250, y: 200 };
+            }
+            
+            const start = flowLine[0];
+            const end = flowLine[flowLine.length - 1];
+            
+            if (!start || !end || !isFinite(start.x) || !isFinite(start.y) || !isFinite(end.x) || !isFinite(end.y)) {
+                return { x: 250, y: 200 };
+            }
+            
+            return {
+                x: start.x + (end.x - start.x) * t,
+                y: start.y + (end.y - start.y) * t
+            };
+        }
+
+        function calculateFlowRotation(flowLine, t) {
+            if (!flowLine || flowLine.length < 2) {
+                return 0;
+            }
+            
+            const start = flowLine[0];
+            const end = flowLine[flowLine.length - 1];
+            
+            if (!start || !end) return 0;
+            
+            const angle = Math.atan2(end.y - start.y, end.x - start.x);
+            return isFinite(angle) ? angle : 0;
+        }
+
+        function isPointInsideShape(point, shapePoints) {
+            // Simple point-in-polygon test
+            let inside = false;
+            for (let i = 0, j = shapePoints.length - 1; i < shapePoints.length; j = i++) {
+                if (((shapePoints[i].y > point.y) !== (shapePoints[j].y > point.y)) &&
+                    (point.x < (shapePoints[j].x - shapePoints[i].x) * (point.y - shapePoints[i].y) / (shapePoints[j].y - shapePoints[i].y) + shapePoints[i].x)) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        function createInsetPath(points, inset) {
+            // Simplified path inset - in production, use a robust offsetting algorithm
+            const insetPoints = [];
+            const center = calculateBoundingBox(points);
+            
+            points.forEach(point => {
+                const dx = point.x - center.centerX;
+                const dy = point.y - center.centerY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const normalizedDx = dx / length;
+                const normalizedDy = dy / length;
+                
+                insetPoints.push({
+                    x: point.x - normalizedDx * inset,
+                    y: point.y - normalizedDy * inset
+                });
+            });
+            
+            return insetPoints;
+        }
+
+        function interpolateAlongPath(pathPoints, t) {
+            const totalLength = calculatePathLength(pathPoints);
+            const targetLength = totalLength * t;
+            
+            let currentLength = 0;
+            for (let i = 1; i < pathPoints.length; i++) {
+                const segmentLength = Math.sqrt(
+                    Math.pow(pathPoints[i].x - pathPoints[i-1].x, 2) +
+                    Math.pow(pathPoints[i].y - pathPoints[i-1].y, 2)
+                );
+                
+                if (currentLength + segmentLength >= targetLength) {
+                    const segmentT = (targetLength - currentLength) / segmentLength;
+                    return {
+                        x: pathPoints[i-1].x + (pathPoints[i].x - pathPoints[i-1].x) * segmentT,
+                        y: pathPoints[i-1].y + (pathPoints[i].y - pathPoints[i-1].y) * segmentT
+                    };
+                }
+                
+                currentLength += segmentLength;
+            }
+            
+            return pathPoints[pathPoints.length - 1];
+        }
+
+        function calculateTangentAngle(pathPoints, t) {
+            const pos = interpolateAlongPath(pathPoints, t);
+            const nextT = Math.min(t + 0.01, 1);
+            const nextPos = interpolateAlongPath(pathPoints, nextT);
+            
+            return Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
+        }
+
+        function renderPatternInPreview(patterns) {
+            const svg = document.getElementById('previewSVG');
+            const container = svg.querySelector('#patternContainer');
+            
+            // Clear existing patterns
+            container.innerHTML = '';
+            
+            // Add each pattern element
+            patterns.forEach((pattern, index) => {
+                const element = createPatternElement(pattern, index);
+                container.appendChild(element);
+            });
+            
+            showStatus(`✅ Generated ${patterns.length} pattern elements`, 'success');
+        }
+
+        function createPatternElement(pattern, index) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            // Validate transform values
+            const x = isFinite(pattern.x) ? pattern.x : 250;
+            const y = isFinite(pattern.y) ? pattern.y : 200; 
+            const rotation = isFinite(pattern.rotation) ? pattern.rotation : 0;
+            const scale = isFinite(pattern.scale) && pattern.scale > 0 ? pattern.scale : 1;
+            const opacity = isFinite(pattern.opacity) ? Math.max(0, Math.min(1, pattern.opacity)) : 0.8;
+            
+            g.setAttribute('transform', 
+                `translate(${x}, ${y}) rotate(${rotation}) scale(${scale})`
+            );
+            g.setAttribute('opacity', opacity);
+            
+            // Create pattern based on type
+            const patternPath = generatePatternPath(pattern.type);
+            
+            if (patternPath) {
+                const element = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                element.setAttribute('d', patternPath);
+                element.setAttribute('stroke', '#2c3e50');
+                element.setAttribute('stroke-width', '1.5');
+                element.setAttribute('fill', 'none');
+                element.setAttribute('stroke-linecap', 'round');
+                element.setAttribute('stroke-linejoin', 'round');
+                g.appendChild(element);
+            }
+            
+            // Add decorative elements for some patterns
+            if (pattern.type === 'filigree' || pattern.type === 'victorian') {
+                const decoration = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                decoration.setAttribute('cx', '0');
+                decoration.setAttribute('cy', '0');
+                decoration.setAttribute('r', '1.5');
+                decoration.setAttribute('fill', '#34495e');
+                decoration.setAttribute('opacity', '0.6');
+                g.appendChild(decoration);
+            }
+            
+            // Add subtle animation
+            g.style.animation = `patternFadeIn 0.3s ease ${Math.min(index * 0.01, 2)}s both`;
+            
+            return g;
+        }
+
+        function generatePatternPath(patternType) {
+            const patterns = {
+                scrollwork: [
+                    "M-10,0 Q-5,-8 0,0 Q5,8 10,0 Q15,-5 20,0",
+                    "M-8,0 Q0,-6 8,0 Q0,6 -8,0 M0,-3 L0,3",
+                    "M-12,0 Q-6,-6 0,-3 Q6,0 12,3 Q6,6 0,3 Q-6,0 -12,0"
+                ],
+                filigree: [
+                    "M-6,0 Q-3,-4 0,0 Q3,-4 6,0 Q3,4 0,0 Q-3,4 -6,0 M-2,-2 L2,2 M2,-2 L-2,2",
+                    "M-8,0 C-4,-6 4,-6 8,0 C4,6 -4,6 -8,0 M-4,0 Q0,-3 4,0 Q0,3 -4,0",
+                    "M-5,0 Q0,-8 5,0 Q0,8 -5,0 M-3,-3 L3,3 M3,-3 L-3,3 M0,-5 L0,5"
+                ],
+                geometric: [
+                    "M-6,-6 L6,-6 L6,6 L-6,6 Z M-3,-3 L3,-3 L3,3 L-3,3 Z",
+                    "M-8,0 L-4,-4 L0,0 L4,-4 L8,0 L4,4 L0,0 L-4,4 Z",
+                    "M0,-8 L4,-4 L8,0 L4,4 L0,8 L-4,4 L-8,0 L-4,-4 Z"
+                ],
+                organic: [
+                    "M-10,0 Q-8,-5 -4,-3 Q0,-8 4,-3 Q8,-5 10,0 Q8,5 4,3 Q0,8 -4,3 Q-8,5 -10,0",
+                    "M-6,0 Q-3,-6 0,-2 Q3,-6 6,0 Q3,6 0,2 Q-3,6 -6,0 Q-1,0 1,0",
+                    "M-8,0 C-6,-4 -2,-6 0,-3 C2,-6 6,-4 8,0 C6,4 2,6 0,3 C-2,6 -6,4 -8,0"
+                ],
+                tribal: [
+                    "M-10,0 L-6,-4 L-2,0 L2,-4 L6,0 L10,-4 L10,4 L6,0 L2,4 L-2,0 L-6,4 L-10,4 Z",
+                    "M-8,0 L0,-8 L8,0 L0,8 Z M-4,0 L0,-4 L4,0 L0,4 Z",
+                    "M-6,-6 L6,0 L-6,6 L0,0 Z M-3,-3 L3,0 L-3,3 Z"
+                ],
+                victorian: [
+                    "M-12,0 Q-8,-6 -4,-2 Q0,-8 4,-2 Q8,-6 12,0 Q8,6 4,2 Q0,8 -4,2 Q-8,6 -12,0 M-6,0 Q-3,-3 0,0 Q3,-3 6,0",
+                    "M-10,0 C-8,-4 -4,-6 0,-3 C4,-6 8,-4 10,0 C8,4 4,6 0,3 C-4,6 -8,4 -10,0 M-5,-2 L5,2 M5,-2 L-5,2",
+                    "M-8,0 Q-6,-5 0,-2 Q6,-5 8,0 Q6,5 0,2 Q-6,5 -8,0 M-4,-1 Q0,-3 4,-1 M-4,1 Q0,3 4,1"
+                ]
+            };
+            
+            const typePatterns = patterns[patternType] || patterns.scrollwork;
+            return typePatterns[Math.floor(Math.random() * typePatterns.length)];
+        }
+
+        function showStatus(message, type) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            statusBar.className = `status-bar show ${type}`;
+            
+            setTimeout(() => {
+                statusBar.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes patternFadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

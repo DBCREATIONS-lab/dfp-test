@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngraveFill Pro - Commercial Laser Pattern Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .preview-area {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 0.95em;
+        }
+
+        .control-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pattern-option {
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+        }
+
+        .pattern-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .pattern-option.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .pattern-preview {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-purchase {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-purchase:hover {
+            background: #218838;
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 800px;
+            min-height: 400px;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            position: relative;
+            padding: 20px;
+        }
+
+        .preview-container svg {
+            max-width: 100%;
+            max-height: 500px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .pricing-info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .watermark-notice {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .purchase-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .range-control input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 EngraveFill Pro</h1>
+            <p>Professional laser engraving pattern generator for commercial use</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="pricing-info">
+                    <strong>💰 Pricing:</strong><br>
+                    • Preview: Free with watermark<br>
+                    • Commercial license: $4.99<br>
+                    • Bulk packages available
+                </div>
+
+                <div class="control-group">
+                    <label>📂 Upload Your Outline</label>
+                    <input type="file" id="boundaryUpload" accept="image/png,image/jpeg,image/svg+xml">
+                    <small style="color: #6c757d; display: block; margin-top: 5px;">
+                        Upload PNG, JPG, or SVG outline
+                    </small>
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Pattern Style</label>
+                    <div class="pattern-grid" id="patternGrid">
+                        <div class="pattern-option active" data-pattern="scrollwork">
+                            <div class="pattern-preview" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><path d=%22M5,20 Q20,5 35,20 Q20,35 5,20%22 fill=%22none%22 stroke=%22%23333%22 stroke-width=%221%22/></svg>') center/contain;"></div>
+                            Scrollwork
+                        </div>
+                        <div class="pattern-option" data-pattern="geometric">
+                            <div class="pattern-preview" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect x=%225%22 y=%225%22 width=%2210%22 height=%2210%22 fill=%22%23333%22/><rect x=%2225%22 y=%225%22 width=%2210%22 height=%2210%22 fill=%22%23333%22/><rect x=%2215%22 y=%2215%22 width=%2210%22 height=%2210%22 fill=%22%23333%22/></svg>') center/contain;"></div>
+                            Geometric
+                        </div>
+                        <div class="pattern-option" data-pattern="celtic">
+                            <div class="pattern-preview" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><circle cx=%2220%22 cy=%2220%22 r=%2210%22 fill=%22none%22 stroke=%22%23333%22 stroke-width=%222%22/><circle cx=%2220%22 cy=%2220%22 r=%225%22 fill=%22none%22 stroke=%22%23333%22 stroke-width=%221%22/></svg>') center/contain;"></div>
+                            Celtic
+                        </div>
+                        <div class="pattern-option" data-pattern="floral">
+                            <div class="pattern-preview" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><path d=%22M20,10 Q25,15 20,20 Q15,15 20,10 M20,20 Q25,25 20,30 Q15,25 20,20%22 fill=%22%23333%22/></svg>') center/contain;"></div>
+                            Floral
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Pattern Density</label>
+                    <div class="range-control">
+                        <input type="range" id="density" min="5" max="25" value="12">
+                        <span class="range-value" id="densityVal">12</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Pattern Scale</label>
+                    <div class="range-control">
+                        <input type="range" id="scale" min="0.3" max="3.0" step="0.1" value="1.0">
+                        <span class="range-value" id="scaleVal">1.0</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="generateBtn" disabled>
+                    🎨 Generate Preview
+                </button>
+
+                <div class="purchase-section" id="purchaseSection" style="display: none;">
+                    <h3>💎 Purchase Commercial License</h3>
+                    <p>Remove watermark and get high-res version</p>
+                    <button class="btn btn-purchase" id="purchaseBtn">
+                        💳 Buy License - $4.99
+                    </button>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <div class="preview-container" id="previewContainer">
+                    <div style="text-align: center; color: #6c757d;">
+                        <h3>Upload an outline to get started</h3>
+                        <p>Choose your pattern style and generate a preview</p>
+                    </div>
+                </div>
+
+                <div class="watermark-notice" id="watermarkNotice" style="display: none;">
+                    <strong>⚠️ Preview Version</strong><br>
+                    This preview includes a watermark. Purchase a commercial license to get the clean, high-resolution version for laser engraving.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let boundaryFile = null;
+        let selectedPattern = 'scrollwork';
+        let currentSVG = null;
+
+        // Pattern selection
+        document.getElementById('patternGrid').addEventListener('click', (e) => {
+            if (e.target.classList.contains('pattern-option') || e.target.closest('.pattern-option')) {
+                const option = e.target.closest('.pattern-option') || e.target;
+                
+                document.querySelectorAll('.pattern-option').forEach(p => p.classList.remove('active'));
+                option.classList.add('active');
+                
+                selectedPattern = option.dataset.pattern;
+                console.log('Selected pattern:', selectedPattern);
+                
+                if (boundaryFile) {
+                    generatePattern();
+                }
+            }
+        });
+
+        // File upload
+        document.getElementById('boundaryUpload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                boundaryFile = file;
+                document.getElementById('generateBtn').disabled = false;
+                console.log('File uploaded:', file.name);
+            }
+        });
+
+        // Range controls
+        ['density', 'scale'].forEach(id => {
+            const input = document.getElementById(id);
+            const display = document.getElementById(id + 'Val');
+            
+            input.addEventListener('input', function() {
+                display.textContent = this.value;
+                if (boundaryFile) {
+                    generatePattern();
+                }
+            });
+        });
+
+        // Generate button
+        document.getElementById('generateBtn').addEventListener('click', generatePattern);
+
+        // Purchase button
+        document.getElementById('purchaseBtn').addEventListener('click', () => {
+            alert('🚀 Payment integration coming soon!\n\nThis would integrate with:\n• Stripe for payments\n• PayPal\n• Or your preferred payment processor\n\nFor now, this demonstrates the commercial workflow.');
+        });
+
+        function generatePattern() {
+            if (!boundaryFile) return;
+
+            const previewContainer = document.getElementById('previewContainer');
+            const purchaseSection = document.getElementById('purchaseSection');
+            const watermarkNotice = document.getElementById('watermarkNotice');
+
+            // Show loading
+            previewContainer.innerHTML = `
+                <div style="text-align: center;">
+                    <h3>🎨 Generating Pattern...</h3>
+                    <p>Creating your laser engraving pattern</p>
+                </div>
+            `;
+
+            // Simulate pattern generation (in real app, this would use your pattern algorithms)
+            setTimeout(() => {
+                const density = document.getElementById('density').value;
+                const scale = document.getElementById('scale').value;
+
+                // Create preview SVG with watermark
+                const svg = createPatternSVG(selectedPattern, density, scale, true);
+                
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(svg);
+                
+                // Show purchase options
+                purchaseSection.style.display = 'block';
+                watermarkNotice.style.display = 'block';
+                
+                currentSVG = svg;
+                
+            }, 1500);
+        }
+
+        function createPatternSVG(pattern, density, scale, addWatermark = false) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 800 400');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '400');
+            
+            // Create boundary (simplified knife shape)
+            const boundary = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            boundary.setAttribute('d', 'M100,200 L300,200 L310,190 L700,195 L710,200 L700,205 L310,210 L300,200 Z');
+            boundary.setAttribute('stroke', '#333');
+            boundary.setAttribute('stroke-width', '2');
+            boundary.setAttribute('fill', 'none');
+            
+            // Add pattern fill based on selection
+            const patternGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            if (pattern === 'scrollwork') {
+                createScrollworkPattern(patternGroup, density, scale);
+            } else if (pattern === 'geometric') {
+                createGeometricPattern(patternGroup, density, scale);
+            } else if (pattern === 'celtic') {
+                createCelticPattern(patternGroup, density, scale);
+            } else if (pattern === 'floral') {
+                createFloralPattern(patternGroup, density, scale);
+            }
+            
+            // Add clipping
+            const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+            clipPath.setAttribute('id', 'boundary');
+            const clipShape = boundary.cloneNode(true);
+            clipShape.setAttribute('fill', 'black');
+            clipPath.appendChild(clipShape);
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            defs.appendChild(clipPath);
+            
+            svg.appendChild(defs);
+            patternGroup.setAttribute('clip-path', 'url(#boundary)');
+            svg.appendChild(patternGroup);
+            svg.appendChild(boundary);
+            
+            // Add watermark if preview
+            if (addWatermark) {
+                const watermark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                watermark.setAttribute('x', '400');
+                watermark.setAttribute('y', '200');
+                watermark.setAttribute('text-anchor', 'middle');
+                watermark.setAttribute('font-size', '48');
+                watermark.setAttribute('fill', 'rgba(255,0,0,0.3)');
+                watermark.setAttribute('transform', 'rotate(-30 400 200)');
+                watermark.textContent = 'PREVIEW';
+                svg.appendChild(watermark);
+            }
+            
+            return svg;
+        }
+
+        function createScrollworkPattern(group, density, scale) {
+            for (let i = 0; i < density * 10; i++) {
+                const x = 150 + Math.random() * 500;
+                const y = 180 + Math.random() * 40;
+                
+                const scroll = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const size = 10 * scale;
+                scroll.setAttribute('d', `M${x},${y} Q${x + size},${y - size} ${x + size * 2},${y} Q${x + size},${y + size} ${x},${y}`);
+                scroll.setAttribute('stroke', '#000');
+                scroll.setAttribute('stroke-width', '1');
+                scroll.setAttribute('fill', 'none');
+                group.appendChild(scroll);
+            }
+        }
+
+        function createGeometricPattern(group, density, scale) {
+            for (let i = 0; i < density * 8; i++) {
+                const x = 150 + Math.random() * 500;
+                const y = 180 + Math.random() * 40;
+                const size = 8 * scale;
+                
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', y);
+                rect.setAttribute('width', size);
+                rect.setAttribute('height', size);
+                rect.setAttribute('stroke', '#000');
+                rect.setAttribute('stroke-width', '1');
+                rect.setAttribute('fill', 'none');
+                group.appendChild(rect);
+            }
+        }
+
+        function createCelticPattern(group, density, scale) {
+            for (let i = 0; i < density * 6; i++) {
+                const x = 150 + Math.random() * 500;
+                const y = 180 + Math.random() * 40;
+                const r = 6 * scale;
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', r);
+                circle.setAttribute('stroke', '#000');
+                circle.setAttribute('stroke-width', '1');
+                circle.setAttribute('fill', 'none');
+                group.appendChild(circle);
+            }
+        }
+
+        function createFloralPattern(group, density, scale) {
+            for (let i = 0; i < density * 8; i++) {
+                const x = 150 + Math.random() * 500;
+                const y = 180 + Math.random() * 40;
+                const size = 6 * scale;
+                
+                const petal = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                petal.setAttribute('d', `M${x},${y} Q${x + size},${y - size} ${x},${y - size * 2} Q${x - size},${y - size} ${x},${y}`);
+                petal.setAttribute('stroke', '#000');
+                petal.setAttribute('stroke-width', '1');
+                petal.setAttribute('fill', 'none');
+                group.appendChild(petal);
+            }
+        }
+    </script>
+</body>
+</html>

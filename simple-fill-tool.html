@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Fill Tool - What You Actually Wanted</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4834d4 0%, #686de0 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            min-height: 600px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 25px;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .workspace {
+            padding: 25px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #4834d4;
+            background: #f7fafc;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .fill-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .fill-option {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .fill-option:hover {
+            border-color: #4834d4;
+        }
+
+        .fill-option.active {
+            border-color: #4834d4;
+            background: #4834d4;
+            color: white;
+        }
+
+        .parameter {
+            margin: 15px 0;
+        }
+
+        .parameter label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-control input {
+            flex: 1;
+        }
+
+        .range-control .value {
+            min-width: 45px;
+            padding: 4px 8px;
+            background: #4834d4;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4834d4 0%, #686de0 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 52, 212, 0.3);
+        }
+
+        .generate-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .preview-svg {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 550px;
+        }
+
+        .status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 10px 15px;
+            background: #2d3748;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .download-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            padding: 10px 20px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+        }
+
+        .download-btn.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Simple Fill Tool</h1>
+            <p>Upload your outline → Choose fill pattern → Get result</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="section">
+                    <h3>📁 Upload Shape</h3>
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept=".svg,image/*">
+                        <div>
+                            <div style="font-size: 2em; margin-bottom: 10px;">📤</div>
+                            <div><strong>Click to upload</strong></div>
+                            <div style="color: #718096; font-size: 0.9em; margin-top: 5px;">
+                                SVG, PNG, or JPG
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>🎨 Fill Pattern</h3>
+                    <div class="fill-options">
+                        <div class="fill-option active" data-fill="scrollwork">
+                            <strong>Scrollwork</strong><br>
+                            <small>Flowing decorative</small>
+                        </div>
+                        <div class="fill-option" data-fill="geometric">
+                            <strong>Geometric</strong><br>
+                            <small>Clean patterns</small>
+                        </div>
+                        <div class="fill-option" data-fill="organic">
+                            <strong>Organic</strong><br>
+                            <small>Natural flow</small>
+                        </div>
+                        <div class="fill-option" data-fill="tribal">
+                            <strong>Tribal</strong><br>
+                            <small>Bold angular</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>⚙️ Settings</h3>
+                    
+                    <div class="parameter">
+                        <label>Density</label>
+                        <div class="range-control">
+                            <input type="range" id="density" min="10" max="50" value="25">
+                            <div class="value" id="densityValue">25</div>
+                        </div>
+                    </div>
+
+                    <div class="parameter">
+                        <label>Size</label>
+                        <div class="range-control">
+                            <input type="range" id="size" min="0.5" max="2.0" step="0.1" value="1.0">
+                            <div class="value" id="sizeValue">1.0</div>
+                        </div>
+                    </div>
+
+                    <div class="parameter">
+                        <label>Spacing</label>
+                        <div class="range-control">
+                            <input type="range" id="spacing" min="5" max="30" value="15">
+                            <div class="value" id="spacingValue">15</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn" disabled>
+                    🎨 Fill Shape
+                </button>
+            </div>
+
+            <div class="workspace">
+                <div class="preview-area">
+                    <svg class="preview-svg" id="previewSVG" viewBox="0 0 800 550">
+                        <text x="400" y="275" text-anchor="middle" fill="#a0aec0" font-size="18">
+                            Upload a shape to get started
+                        </text>
+                    </svg>
+                    
+                    <div class="status" id="status">Ready</div>
+                    <button class="download-btn" id="downloadBtn">📥 Download SVG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentShape = null;
+        let selectedFill = 'scrollwork';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeControls();
+        });
+
+        function initializeControls() {
+            // File upload
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            
+            // Fill pattern selection
+            document.querySelectorAll('.fill-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.fill-option').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    selectedFill = option.dataset.fill;
+                    if (currentShape) generateFill();
+                });
+            });
+
+            // Range controls
+            ['density', 'size', 'spacing'].forEach(id => {
+                const input = document.getElementById(id);
+                const valueDisplay = document.getElementById(id + 'Value');
+                
+                input.addEventListener('input', () => {
+                    valueDisplay.textContent = input.value;
+                    if (currentShape) debounceGenerate();
+                });
+            });
+
+            // Generate button
+            document.getElementById('generateBtn').addEventListener('click', generateFill);
+            
+            // Download button
+            document.getElementById('downloadBtn').addEventListener('click', downloadSVG);
+        }
+
+        let generateTimeout;
+        function debounceGenerate() {
+            clearTimeout(generateTimeout);
+            generateTimeout = setTimeout(generateFill, 300);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showStatus('Loading shape...', 2000);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (file.type.includes('svg')) {
+                    processSVG(e.target.result);
+                } else {
+                    processImage(e.target.result);
+                }
+            };
+
+            if (file.type.includes('svg')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function processSVG(svgContent) {
+            try {
+                currentShape = {
+                    type: 'svg',
+                    content: svgContent
+                };
+                
+                displayShape();
+                document.getElementById('generateBtn').disabled = false;
+                showStatus('Shape loaded! Click "Fill Shape" to generate.', 3000);
+                
+            } catch (error) {
+                showStatus('Error loading SVG', 3000);
+                console.error('SVG error:', error);
+            }
+        }
+
+        function processImage(imageData) {
+            currentShape = {
+                type: 'image',
+                content: imageData
+            };
+            
+            displayShape();
+            document.getElementById('generateBtn').disabled = false;
+            showStatus('Image loaded! Click "Fill Shape" to generate.', 3000);
+        }
+
+        function displayShape() {
+            const svg = document.getElementById('previewSVG');
+            
+            if (currentShape.type === 'svg') {
+                // Extract the SVG content and display it
+                try {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(currentShape.content, 'image/svg+xml');
+                    const svgElement = doc.querySelector('svg');
+                    
+                    if (svgElement) {
+                        // Copy the inner content
+                        svg.innerHTML = svgElement.innerHTML;
+                        svg.setAttribute('viewBox', svgElement.getAttribute('viewBox') || '0 0 800 550');
+                    }
+                } catch (error) {
+                    console.error('Error displaying SVG:', error);
+                }
+            } else {
+                // For images, create a placeholder shape
+                svg.innerHTML = `
+                    <image href="${currentShape.content}" x="100" y="100" width="600" height="350" opacity="0.3"/>
+                    <rect x="100" y="100" width="600" height="350" fill="none" stroke="#4834d4" stroke-width="3"/>
+                `;
+            }
+        }
+
+        function generateFill() {
+            if (!currentShape) return;
+
+            showStatus('Generating fill pattern...', 2000);
+
+            const density = parseInt(document.getElementById('density').value);
+            const size = parseFloat(document.getElementById('size').value);
+            const spacing = parseInt(document.getElementById('spacing').value);
+
+            setTimeout(() => {
+                try {
+                    const fillElements = createFillPattern(selectedFill, density, size, spacing);
+                    addFillToSVG(fillElements);
+                    
+                    showStatus('Fill generated successfully!', 3000);
+                    document.getElementById('downloadBtn').classList.add('show');
+                    
+                } catch (error) {
+                    showStatus('Error generating fill', 3000);
+                    console.error('Fill error:', error);
+                }
+            }, 500);
+        }
+
+        function createFillPattern(fillType, density, size, spacing) {
+            const patterns = [];
+            const bounds = { x: 150, y: 150, width: 500, height: 250 };
+            
+            // Calculate pattern placement
+            const cols = Math.floor(bounds.width / spacing);
+            const rows = Math.floor(bounds.height / spacing);
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    if (Math.random() > (1 - density/50)) {
+                        const x = bounds.x + (col * spacing) + Math.random() * 10;
+                        const y = bounds.y + (row * spacing) + Math.random() * 10;
+                        const rotation = Math.random() * 360;
+                        const scale = size * (0.8 + Math.random() * 0.4);
+                        
+                        patterns.push({
+                            type: fillType,
+                            x: x,
+                            y: y,
+                            rotation: rotation,
+                            scale: scale
+                        });
+                    }
+                }
+            }
+            
+            return patterns;
+        }
+
+        function addFillToSVG(patterns) {
+            const svg = document.getElementById('previewSVG');
+            
+            // Remove existing fill
+            const existingFill = svg.querySelector('#fillGroup');
+            if (existingFill) existingFill.remove();
+            
+            // Create new fill group
+            const fillGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            fillGroup.id = 'fillGroup';
+            
+            patterns.forEach((pattern, index) => {
+                const element = createPatternElement(pattern);
+                if (element) fillGroup.appendChild(element);
+            });
+            
+            svg.appendChild(fillGroup);
+        }
+
+        function createPatternElement(pattern) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', `translate(${pattern.x}, ${pattern.y}) rotate(${pattern.rotation}) scale(${pattern.scale})`);
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', getPatternPath(pattern.type));
+            path.setAttribute('stroke', '#2d3748');
+            path.setAttribute('stroke-width', '1.5');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linecap', 'round');
+            
+            g.appendChild(path);
+            return g;
+        }
+
+        function getPatternPath(type) {
+            const patterns = {
+                scrollwork: "M-8,0 Q-4,-6 0,0 Q4,6 8,0 Q4,-4 0,0",
+                geometric: "M-6,-6 L6,-6 L6,6 L-6,6 Z M-3,-3 L3,3 M3,-3 L-3,3",
+                organic: "M-8,0 Q-4,-4 0,-2 Q4,-4 8,0 Q4,4 0,2 Q-4,4 -8,0",
+                tribal: "M-6,0 L0,-8 L6,0 L0,8 Z M-3,0 L3,0"
+            };
+            
+            return patterns[type] || patterns.scrollwork;
+        }
+
+        function showStatus(message, duration) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.classList.add('show');
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, duration);
+        }
+
+        function downloadSVG() {
+            const svg = document.getElementById('previewSVG');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = svgUrl;
+            downloadLink.download = "filled-design.svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            showStatus('Downloaded!', 2000);
+        }
+    </script>
+</body>
+</html>

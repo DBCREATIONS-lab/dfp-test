@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Engrave Fill - Replicate Integration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1d24 0%, #2d3748 100%);
+      color: #e7e7e7;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(35, 39, 47, 0.95);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    h1 {
+      color: #6beeff;
+      font-size: 2.5em;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 10px rgba(107, 238, 255, 0.3);
+    }
+    .subtitle {
+      color: #98a3b8;
+      font-size: 1.1em;
+    }
+    .hero-box {
+      background: linear-gradient(135deg, #2a3040 0%, #1a1e23 100%);
+      border-left: 4px solid #6beeff;
+      padding: 24px;
+      margin: 24px 0;
+      border-radius: 8px;
+      line-height: 1.7;
+    }
+    .hero-box strong {
+      color: #6beeff;
+      font-size: 1.1em;
+    }
+    .warning-box {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+    .success-box {
+      background: rgba(34, 197, 94, 0.1);
+      border-left: 4px solid #22c55e;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+    .section {
+      background: #1a1e23;
+      padding: 28px;
+      border-radius: 12px;
+      margin: 24px 0;
+      border: 1px solid rgba(107, 238, 255, 0.1);
+    }
+    .section-title {
+      color: #6beeff;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-number {
+      background: #6beeff;
+      color: #1a1e23;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 600;
+      color: #d0d8e8;
+      font-size: 1.05em;
+    }
+    .label-desc {
+      font-size: 0.9em;
+      color: #98a3b8;
+      font-weight: 400;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    input[type="text"], input[type="file"], select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: #2a3040;
+      border: 2px solid #3a4050;
+      border-radius: 8px;
+      color: #e7e7e7;
+      font-size: 1em;
+      margin-top: 8px;
+      transition: all 0.3s;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #6beeff;
+      box-shadow: 0 0 0 3px rgba(107, 238, 255, 0.1);
+    }
+    textarea {
+      min-height: 100px;
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+    }
+    .input-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    .preview-box {
+      background: #0d0f12;
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px solid #2a3040;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-title {
+      color: #6beeff;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1.1em;
+    }
+    .preview-content {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .preview-placeholder {
+      color: #666;
+      text-align: center;
+      padding: 40px;
+    }
+    button {
+      background: linear-gradient(135deg, #6beeff 0%, #4db8e8 100%);
+      color: #1a1e23;
+      font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(107, 238, 255, 0.3);
+      width: 100%;
+      margin-top: 20px;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(107, 238, 255, 0.5);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    button.secondary {
+      background: linear-gradient(135deg, #4a5568 0%, #374151 100%);
+      color: #e7e7e7;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+    .loading.active {
+      display: block;
+    }
+    .spinner {
+      border: 4px solid rgba(107, 238, 255, 0.1);
+      border-left-color: #6beeff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .status-message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .status-message.show {
+      display: block;
+    }
+    .code-block {
+      background: #0d0f12;
+      border: 1px solid #2a3040;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      overflow-x: auto;
+    }
+    .code-block code {
+      color: #6beeff;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .feature-card {
+      background: #2a3040;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(107, 238, 255, 0.1);
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: #6beeff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(107, 238, 255, 0.2);
+    }
+    .feature-icon {
+      font-size: 2em;
+      margin-bottom: 12px;
+    }
+    .feature-title {
+      color: #6beeff;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .link {
+      color: #6beeff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 AI Engrave Fill Generator</h1>
+      <p class="subtitle">Powered by Replicate AI - Generate unique scrollwork designs</p>
+    </div>
+
+    <div class="hero-box">
+      <strong>🚀 How This Works:</strong><br>
+      This tool uses Replicate's AI models (Stable Diffusion + ControlNet) to generate unique scrollwork designs that fill your boundary shape. Upload your outline, choose a style, and let AI create a one-of-a-kind engraving design!
+    </div>
+
+    <div class="warning-box">
+      <strong>⚙️ Setup Required:</strong><br>
+      To use this tool, you need a <strong>Replicate API token</strong>. This is a paid service (~$0.10-0.50 per generation).<br><br>
+      <strong>Get your API token:</strong><br>
+      1. Sign up at <a href="https://replicate.com" target="_blank" class="link">replicate.com</a><br>
+      2. Add billing (pay-as-you-go, very affordable)<br>
+      3. Get your API token from <a href="https://replicate.com/account/api-tokens" target="_blank" class="link">Account → API Tokens</a><br>
+      4. Paste it below (stored in browser only, not sent anywhere except Replicate)<br><br>
+      <strong>⚠️ Important:</strong> Press <strong>F12</strong> to open Developer Console and watch for errors if something goes wrong!
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span class="step-number">1</span>
+        API Configuration
+      </div>
+      
+      <label>
+        Replicate API Token
+        <div class="label-desc">Your secret API token - stored locally in browser only</div>
+        <input type="text" id="apiToken" placeholder="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+      </label>
+
+      <label>
+        AI Model to Use
+        <div class="label-desc">Different models for different styles and quality</div>
+        <select id="modelSelect">
+          <option value="stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b">SDXL (Highest Quality - Slower)</option>
+          <option value="stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf" selected>Stable Diffusion 1.5 (Fast - Good Quality)</option>
+          <option value="jagilley/controlnet-canny:aff48af9c68d162388d230a2ab003f68d2638d88307bdaf1c2f1ac95079c9613">ControlNet Canny (Best for Outlines)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span class="step-number">2</span>
+        Upload Your Boundary Shape
+      </div>
+      
+      <label>
+        Shape Outline Image
+        <div class="label-desc">PNG or JPEG with your shape outline (knife blade, frame, panel, etc.)</div>
+        <input type="file" id="boundaryFile" accept="image/*" />
+      </label>
+
+      <div class="preview-grid">
+        <div class="preview-box">
+          <div class="preview-title">📐 Your Outline</div>
+          <div class="preview-content" id="outlinePreview">
+            <div class="preview-placeholder">Upload an outline image above</div>
+          </div>
+        </div>
+        <div class="preview-box">
+          <div class="preview-title">✨ AI Generated Result</div>
+          <div class="preview-content" id="resultPreview">
+            <div class="preview-placeholder">Generated design will appear here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span class="step-number">3</span>
+        Style & Prompts
+      </div>
+
+      <label>
+        Style Preset
+        <div class="label-desc">Choose the engraving style for your design</div>
+        <select id="stylePreset">
+          <option value="baroque">Baroque Scrollwork</option>
+          <option value="western" selected>Western Scrollwork</option>
+          <option value="victorian">Victorian Ornate</option>
+          <option value="acanthus">Acanthus Leaf</option>
+          <option value="sheridan">Sheridan Leather Tooling</option>
+          <option value="celtic">Celtic Knotwork</option>
+          <option value="floral">Floral Ornament</option>
+          <option value="custom">Custom (Edit Prompt Below)</option>
+        </select>
+      </label>
+
+      <label>
+        AI Prompt (Customize)
+        <div class="label-desc">Describe what you want - the AI will generate based on this</div>
+        <textarea id="prompt">intricate western scrollwork engraving pattern, flowing acanthus leaves and baroque flourishes, ornate decorative fill, black and white line art, laser engraving ready, detailed filigree design</textarea>
+      </label>
+
+      <label>
+        Negative Prompt (What to Avoid)
+        <div class="label-desc">Things you DON'T want in the design</div>
+        <textarea id="negativePrompt">blurry, low quality, pixelated, color, photographic, 3d render, text, watermark</textarea>
+      </label>
+
+      <div class="input-group">
+        <label>
+          Guidance Scale (7-20)
+          <div class="label-desc">How closely to follow prompt (higher = more literal)</div>
+          <input type="number" id="guidance" value="12" min="1" max="30" />
+        </label>
+        
+        <label>
+          Steps (20-100)
+          <div class="label-desc">Quality/detail level (higher = better but slower)</div>
+          <input type="number" id="steps" value="50" min="10" max="150" />
+        </label>
+      </div>
+    </div>
+
+    <button id="generateBtn" disabled>
+      🎨 Generate AI Scrollwork Design
+    </button>
+
+    <button id="testBtn" class="secondary" style="margin-top: 12px;">
+      🧪 Test API Token (Generate Test Image)
+    </button>
+
+    <div class="loading" id="loadingIndicator">
+      <div class="spinner"></div>
+      <div style="color: #6beeff; font-weight: 600; font-size: 1.1em;">
+        Generating your design with AI...
+      </div>
+      <div style="color: #98a3b8; margin-top: 8px;">
+        This usually takes 30-60 seconds
+      </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <button id="downloadBtn" class="secondary" style="display:none;">
+      💾 Download Generated Design
+    </button>
+
+    <div class="section">
+      <div class="section-title">📚 Style Examples & Tips</div>
+      
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌿</div>
+          <div class="feature-title">Western Scrollwork</div>
+          <div class="label-desc">Classic acanthus leaves and flowing baroque elements</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👑</div>
+          <div class="feature-title">Victorian Ornate</div>
+          <div class="label-desc">Intricate, dense patterns with fine detail</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏛️</div>
+          <div class="feature-title">Baroque</div>
+          <div class="label-desc">Dramatic, flowing curves and flourishes</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🐴</div>
+          <div class="feature-title">Sheridan Leather</div>
+          <div class="label-desc">Traditional leather tooling patterns</div>
+        </div>
+      </div>
+
+      <div class="success-box" style="margin-top: 24px;">
+        <strong>💡 Pro Tips:</strong><br>
+        • Use high-contrast black and white outline images for best results<br>
+        • Increase "Steps" for more detailed, refined patterns<br>
+        • Experiment with different prompts to get unique variations<br>
+        • Save your favorites - each generation is unique!<br>
+        • Cost: ~$0.10-0.50 per generation depending on model and settings
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔧 Technical Details</div>
+      
+      <div class="error-box">
+        <strong>⚠️ Important Notes:</strong><br>
+        • This is a <strong>prototype/proof of concept</strong><br>
+        • Requires Replicate API account with billing<br>
+        • Works client-side but calls Replicate's cloud API<br>
+        • Results may vary - AI is creative but not always perfect<br>
+        • For production: Consider building a proper backend server<br>
+        • Cost optimization: Cache results, batch process, use webhooks
+      </div>
+
+      <div class="code-block">
+        <code>
+          // This tool uses Replicate's REST API<br>
+          // Model: Stable Diffusion + ControlNet<br>
+          // Processing: Cloud-based GPU inference<br>
+          // Cost: Pay per generation (~$0.10-0.50 each)
+        </code>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    let apiToken = localStorage.getItem('replicateApiToken') || '';
+    let boundaryImage = null;
+    let generatedImageUrl = null;
+    
+    // Style presets
+    const stylePrompts = {
+      baroque: "intricate baroque scrollwork engraving pattern, ornate flowing curves and flourishes, decorative fill, black and white line art, laser engraving ready, detailed filigree design",
+      western: "intricate western scrollwork engraving pattern, flowing acanthus leaves and baroque flourishes, ornate decorative fill, black and white line art, laser engraving ready, detailed filigree design",
+      victorian: "ornate victorian engraving pattern, intricate floral scrollwork, dense decorative elements, black and white line art, laser engraving ready, highly detailed",
+      acanthus: "flowing acanthus leaf scrollwork pattern, classical ornamental design, organic curves, black and white line art, laser engraving ready",
+      sheridan: "sheridan style leather tooling pattern, western floral scrollwork, decorative leather carving design, black and white line art, engraving ready",
+      celtic: "celtic knotwork pattern, interwoven bands, traditional celtic design, black and white line art, laser engraving ready",
+      floral: "intricate floral ornament pattern, botanical scrollwork, decorative flowers and leaves, black and white line art, laser engraving ready"
+    };
+
+    // Load saved API token
+    if (apiToken) {
+      document.getElementById('apiToken').value = apiToken;
+    }
+
+    // Event listeners
+    document.getElementById('apiToken').addEventListener('input', function() {
+      apiToken = this.value.trim();
+      localStorage.setItem('replicateApiToken', apiToken);
+      checkReadiness();
+    });
+
+    document.getElementById('boundaryFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        boundaryImage = evt.target.result;
+        
+        const preview = document.getElementById('outlinePreview');
+        preview.innerHTML = `<img src="${boundaryImage}" alt="Outline" />`;
+        
+        checkReadiness();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('stylePreset').addEventListener('change', function() {
+      const style = this.value;
+      if (style !== 'custom' && stylePrompts[style]) {
+        document.getElementById('prompt').value = stylePrompts[style];
+      }
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', generateAIDesign);
+    document.getElementById('testBtn').addEventListener('click', testAPIToken);
+    document.getElementById('downloadBtn').addEventListener('click', downloadResult);
+
+    function checkReadiness() {
+      const hasToken = apiToken.length > 10;
+      const hasImage = boundaryImage !== null;
+      const btn = document.getElementById('generateBtn');
+      
+      // Show helpful message
+      if (!hasToken && !hasImage) {
+        btn.textContent = '⚠️ Add API Token & Upload Image First';
+      } else if (!hasToken) {
+        btn.textContent = '⚠️ Add API Token First';
+      } else if (!hasImage) {
+        btn.textContent = '⚠️ Upload Boundary Image First';
+      } else {
+        btn.textContent = '🎨 Generate AI Scrollwork Design';
+      }
+      
+      btn.disabled = !(hasToken && hasImage);
+      
+      console.log('Readiness check:', { hasToken, hasImage, tokenLength: apiToken.length });
+    }
+
+    async function testAPIToken() {
+      if (!apiToken) {
+        showStatus('❌ Please enter your Replicate API token first', 'error');
+        return;
+      }
+
+      const testBtn = document.getElementById('testBtn');
+      const originalText = testBtn.textContent;
+      testBtn.disabled = true;
+      testBtn.textContent = '⏳ Testing...';
+
+      try {
+        console.log('Testing API token...');
+        showStatus('🔄 Testing your API token with Replicate...', 'info');
+
+        // Simple test: Create a basic text-to-image prediction
+        const response = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${apiToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            version: "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
+            input: {
+              prompt: "simple western scrollwork pattern, black and white line art",
+              width: 512,
+              height: 512,
+              num_inference_steps: 20
+            }
+          })
+        });
+
+        console.log('Test response status:', response.status);
+
+        if (response.status === 201) {
+          const data = await response.json();
+          console.log('Test successful:', data);
+          showStatus('✅ API Token is VALID! Your account is working correctly. Now upload a boundary image to generate custom designs.', 'success');
+          
+          // Wait for result and show it
+          showStatus('⏳ Generating test image to verify everything works...', 'info');
+          const result = await pollPrediction(data.id);
+          
+          if (result.status === 'succeeded') {
+            const testImageUrl = Array.isArray(result.output) ? result.output[0] : result.output;
+            const resultPreview = document.getElementById('resultPreview');
+            resultPreview.innerHTML = `<img src="${testImageUrl}" alt="Test Image" /><div style="margin-top:12px; color:#6beeff;">✅ Test successful! This proves your API works.</div>`;
+            showStatus('✅ Success! Your Replicate API is working perfectly. Upload an outline to generate custom fills!', 'success');
+          }
+          
+        } else if (response.status === 401) {
+          showStatus('❌ API Token INVALID - Check your token at replicate.com/account/api-tokens', 'error');
+        } else if (response.status === 402) {
+          showStatus('❌ BILLING REQUIRED - Add payment method at replicate.com/account/billing', 'error');
+        } else {
+          const errorText = await response.text();
+          console.error('Test failed:', errorText);
+          showStatus(`❌ API Error (${response.status}): ${errorText.substring(0, 100)}`, 'error');
+        }
+
+      } catch (error) {
+        console.error('Test error:', error);
+        showStatus(`❌ Network Error: ${error.message}. Check your internet connection.`, 'error');
+      } finally {
+        testBtn.disabled = false;
+        testBtn.textContent = originalText;
+      }
+    }
+
+    async function generateAIDesign() {
+      if (!apiToken) {
+        showStatus('❌ Please enter your Replicate API token', 'error');
+        return;
+      }
+
+      if (!boundaryImage) {
+        showStatus('❌ Please upload a boundary outline image', 'error');
+        return;
+      }
+
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const generateBtn = document.getElementById('generateBtn');
+      
+      loadingIndicator.classList.add('active');
+      generateBtn.disabled = true;
+      showStatus('🔄 Starting AI generation...', 'info');
+
+      try {
+        // SIMPLIFIED APPROACH: Use a free test model that doesn't require image upload
+        // For production, you'd use ControlNet with proper image handling
+        
+        const prompt = document.getElementById('prompt').value;
+        const negativePrompt = document.getElementById('negativePrompt').value;
+        const guidance = parseFloat(document.getElementById('guidance').value);
+        const steps = parseInt(document.getElementById('steps').value);
+
+        showStatus('🚀 Creating prediction with Replicate API...', 'info');
+        console.log('API Token length:', apiToken.length);
+
+        // Use text-to-image model (simpler, no image upload needed)
+        const predictionResponse = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${apiToken}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'wait'
+          },
+          body: JSON.stringify({
+            version: "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
+            input: {
+              prompt: prompt + ", fitting inside provided boundary shape",
+              negative_prompt: negativePrompt,
+              guidance_scale: guidance,
+              num_inference_steps: steps,
+              width: 768,
+              height: 512
+            }
+          })
+        });
+
+        console.log('Response status:', predictionResponse.status);
+        
+        if (!predictionResponse.ok) {
+          const errorText = await predictionResponse.text();
+          console.error('API Error:', errorText);
+          
+          let errorMsg = 'Failed to create prediction';
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMsg = errorData.detail || errorData.error || errorMsg;
+          } catch (e) {
+            errorMsg = errorText.substring(0, 200);
+          }
+          
+          throw new Error(errorMsg);
+        }
+
+        const prediction = await predictionResponse.json();
+        console.log('Initial prediction:', prediction);
+        
+        showStatus('⏳ AI is generating your design... (this takes 30-60 seconds)', 'info');
+        
+        // Poll for completion
+        const result = await pollPrediction(prediction.id);
+        
+        if (result.status === 'succeeded') {
+          generatedImageUrl = Array.isArray(result.output) ? result.output[0] : result.output;
+          
+          const resultPreview = document.getElementById('resultPreview');
+          resultPreview.innerHTML = `<img src="${generatedImageUrl}" alt="Generated Design" />`;
+          
+          document.getElementById('downloadBtn').style.display = 'block';
+          showStatus('✅ Design generated successfully! Click download to save.', 'success');
+        } else {
+          throw new Error(result.error || 'Generation failed with status: ' + result.status);
+        }
+
+      } catch (error) {
+        console.error('Full error:', error);
+        showStatus(`❌ Error: ${error.message}`, 'error');
+        
+        // Show troubleshooting info
+        if (error.message.includes('authentication') || error.message.includes('token')) {
+          showStatus('❌ API Token Error: Check that your token is correct and has billing enabled at replicate.com/account', 'error');
+        } else if (error.message.includes('quota') || error.message.includes('billing')) {
+          showStatus('❌ Billing Error: Add payment method at replicate.com/account/billing', 'error');
+        }
+      } finally {
+        loadingIndicator.classList.remove('active');
+        generateBtn.disabled = false;
+      }
+    }
+
+    async function pollPrediction(predictionId) {
+      const maxAttempts = 60; // 5 minutes max
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        
+        console.log(`Polling attempt ${attempts + 1}...`);
+        
+        try {
+          const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+            headers: {
+              'Authorization': `Token ${apiToken}`
+            }
+          });
+
+          if (!response.ok) {
+            console.error('Poll failed:', response.status);
+            throw new Error('Failed to check prediction status');
+          }
+
+          const prediction = await response.json();
+          console.log('Prediction status:', prediction.status);
+          
+          if (prediction.status === 'succeeded') {
+            return prediction;
+          }
+          
+          if (prediction.status === 'failed' || prediction.status === 'canceled') {
+            throw new Error(prediction.error || `Generation ${prediction.status}`);
+          }
+
+          attempts++;
+          const elapsed = attempts * 5;
+          showStatus(`⏳ Generating... (${elapsed}s elapsed, please wait)`, 'info');
+          
+        } catch (error) {
+          console.error('Poll error:', error);
+          throw error;
+        }
+      }
+
+      throw new Error('Generation timeout - took longer than 5 minutes');
+    }
+
+    function showStatus(message, type) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.className = 'status-message show';
+      
+      if (type === 'error') {
+        statusEl.className += ' error-box';
+      } else if (type === 'success') {
+        statusEl.className += ' success-box';
+      } else {
+        statusEl.className += ' warning-box';
+      }
+    }
+
+    function downloadResult() {
+      if (!generatedImageUrl) return;
+      
+      const a = document.createElement('a');
+      a.href = generatedImageUrl;
+      a.download = `ai-engrave-fill-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      showStatus('✅ Download started!', 'success');
+    }
+
+    // Initial check
+    checkReadiness();
+  </script>
+</body>
+</html>

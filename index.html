@@ -2,339 +2,1045 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Design Fill Pro — Boundary + Preview (Pattern & Fill Collections)</title>
-  <meta name="description" content="Upload an SVG, auto-generate a boundary version and apply repeat patterns or collection fills. Includes folder chooser for fill sets and a scale slider." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Filigree Pattern Generator - Production Tool</title>
   <style>
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      margin: 0;
-      background: #23272f;
-      color: #eee;
-      min-height: 100vh;
-    }
-    .app {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 32px;
-    }
-    .site-header {
-      display: flex;
-      align-items: center;
-      gap: 36px;
-      margin-bottom: 32px;
-    }
-    .brand img {
-      max-width: 100px;
-      border-radius: 16px;
-      background: #2d3138;
-      box-shadow: 0 2px 8px #0003;
-    }
-    .header-text {
-      flex: 1;
-    }
-    .welcome {
-      color: #6beeff;
-      font-size: 1.3em;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    .title {
-      font-size: 2.1em;
-      font-weight: 800;
-      margin-top: 0.2em;
-    }
-    .tagline {
-      font-size: 1.1em;
-      color: #bbb;
-      margin-top: 0.6em;
-      font-weight: 450;
-      max-width: 550px;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-      padding: 14px 18px;
-      background: #22262b;
-      border-radius: 8px;
-      margin-bottom: 22px;
-    }
-    .spacer {
-      flex: 1;
-    }
-    .controls .btn,
-    .controls select,
-    .controls input[type="range"] {
-      font-size: 1em;
-      padding: 5px 18px;
-      border-radius: 7px;
-      border: none;
-      outline: none;
-      background: #30353b;
-      color: #fff;
-      cursor: pointer;
-    }
-    .controls .btn.primary {
-      background: #6beeff;
-      color: #23272f;
-      font-weight: 700;
-      border: none;
-    }
-    .controls .btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-    .file-btn {
-      padding: 6px 17px;
-      border-radius: 7px;
-      background: #434651;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-    .file-btn:focus {
-      outline: 2px solid #6beeff;
-    }
-    .small {
-      font-size: 0.95em;
-      color: #98a3b8;
-    }
-    .folder-chooser {
-      display: flex;
-      align-items: center;
-      background: #343942;
-      border-radius: 7px;
-      padding: 2px 12px;
-    }
-    .folders {
-      display: flex;
-      gap: 8px;
-    }
-    .folders .folder {
-      background: #4d5663;
-      color: #fff;
-      border-radius: 4px;
-      padding: 0 9px;
-      cursor: pointer;
-      font-size: 0.97em;
-    }
-
-    .panel {
-      background: #20252c;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 18px;
-    }
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2px;
-    }
-    .svg-holder {
-      justify-content: center;
-      align-items: center;
-      margin: 20px 0 5px 0;
-      padding: 14px;
+      font-family: Arial, sans-serif;
       background: #181b21;
-      border-radius: 8px;
-      min-height: 140px;
-      color: #677081;
-      font-size: 1.08em;
-      font-family: monospace;
+      color: #e7e7e7;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 880px;
+      margin: 36px auto;
+      background: #23272f;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 2px 18px #0007;
+    }
+    label {
+      display: block;
+      margin-top: 1.4em;
+      font-weight: 700;
+      color: #6beeff;
+    }
+    input[type="file"] {
+      margin-top: .6em;
+    }
+    .slider-wrap {
+      margin: 2em 0 2em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .output-wrap {
+      background: #101216;
+      border-radius: 10px;
+      margin-top: 24px;
+      padding: 18px 18px 10px 18px;
       text-align: center;
     }
-    .preview-wrap {
-      display: flex;
-      gap: 24px;
+    #svgOutput {
+      background: #fff;
+      border-radius: 7px;
+      margin: 0 auto;
+      display: block;
+      height: 380px;
+      width: 100%;
+      max-width: 700px;
+      border: 2px solid #444858;
     }
-    .preview-wrap > .panel {
-      flex: 1;
-    }
-    .samples-grid {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-      flex-wrap: wrap;
-    }
-    .samples-grid .sample {
-      width: 40px;
-      height: 40px;
-      border: 2px solid #333941;
-      border-radius: 6px;
-      background-size: cover;
-      cursor: pointer;
-      transition: border 0.2s;
-    }
-    .samples-grid .sample.selected {
-      border: 2.5px solid #6beeff;
-    }
-    .pricing-cta {
-      margin-top: 30px;
-      padding: 21px 28px;
-      background: #1a1e23;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 30px;
-      box-shadow: 0 2px 8px #0002;
-    }
-    .cta-text h3 {
-      margin: 0 0 7px 0;
-      color: #6beeff;
-      letter-spacing: 1px;
-    }
-    .cta-btn {
+    button {
+      margin-top: 2em;
       background: #6beeff;
-      color: #23272f;
-      text-decoration: none;
+      color: #181b21;
       font-weight: 700;
-      padding: 8px 22px;
+      padding: 10px 24px;
       border-radius: 7px;
-      margin-right: 8px;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
     }
-    .cta-secondary {
-      color: #bbb;
-      text-decoration: underline;
-      font-weight: 600;
-      font-size: 0.96em;
+    button:disabled {
+      opacity: .6;
+      cursor: default;
     }
-    .note {
-      background: #32394a;
-      color: #adc0ee;
-      border-radius: 7px;
-      padding: 11px 15px;
-      margin-bottom: 24px;
+    .small {
+      font-size: 0.97em;
+      color: #b2cee8;
     }
-
-    .toast-container {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      z-index: 1200;
+    .manual-btn {
+      margin: 4px;
+      padding: 6px 12px;
+      font-size: 0.9em;
     }
-    .toast {
-      background: #33394a;
-      color: #fff;
-      border-radius: 7px;
-      padding: 12px 26px;
-      box-shadow: 0 3px 7px #0002;
-      margin-top: 12px;
-      animation: fadein 0.4s;
+    .pattern-element {
+      cursor: move;
+      outline: none;
     }
-    @keyframes fadein {
-      from { opacity: 0; transform: translateY(10px);}
-      to   { opacity: 1; transform: translateY(0);}
+    .pattern-element.selected {
+      outline: 2px dashed #6beeff;
+      outline-offset: 2px;
     }
-    @media (max-width: 950px) {
-      .app {
-        padding: 14px;
-      }
-      .site-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-      }
-      .preview-wrap {
-        flex-direction: column;
-        gap: 0;
-      }
-      .pricing-cta {
-        flex-direction: column;
-        gap: 7px;
-      }
+    .info-box {
+      background: #2a3040;
+      border-left: 4px solid #6beeff;
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+    .warning-box {
+      background: #3a2f20;
+      border-left: 4px solid #ffb84d;
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+      font-size: 0.95em;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="site-header" role="banner" aria-label="Top header">
-      <div class="brand">
-        <img src="./logo.png" alt="Design Fill Pro logo" width="100" height="100">
-      </div>
-      <div class="header-text" role="region" aria-label="Welcome text">
-        <div class="welcome">Welcome</div>
-        <div class="title">Creative Art &amp; Design Solutions</div>
-        <div class="tagline">Transform your ideas from your uploaded outlines and filled with stunning fills of your choice.</div>
-      </div>
-    </header>
-
-    <div class="controls" role="toolbar" aria-label="SVG controls">
-      <label class="file-btn" for="fileInput" tabindex="0">Upload SVG</label>
-      <input id="fileInput" type="file" accept=".svg" style="display:none">
-      <button id="diagnosticBtn" class="btn" type="button" style="margin-left:8px;">Check Fills Diagnostic</button>
-
-      <select id="patternSelect" aria-label="Choose pattern">
-        <option value="stripes">Diagonal Stripes</option>
-        <option value="dots">Dots</option>
-        <option value="grid">Grid</option>
-        <option value="hatch">Hatch</option>
+  <div class="container">
+    <h1>SVG Filigree Boundary Fitter</h1>
+    <div>
+      <label for="boundarySVG">1. Upload Boundary Shape SVG<br>
+        <span class="small">Tip: Use only one closed path (knife outline etc). Visible only, no fill needed.</span>
+      </label>
+      <input type="file" id="boundarySVG" accept=".svg"/>
+    </div>
+    <div>
+      <label for="patternSVG">2. Upload Filigree Pattern SVG<br>
+        <span class="small">Tip: Use a black &amp; white, seamless or near-seamless pattern SVG.</span>
+      </label>
+      <input type="file" id="patternSVG" accept=".svg"/>
+    </div>
+    <div class="slider-wrap">
+      <label for="scaleRange">Pattern Scale:</label>
+      <input type="range" min="0.1" max="2.5" step="0.05" id="scaleRange" value="1" />
+      <span id="scaleVal">1.00</span>x
+    </div>
+    <div class="slider-wrap">
+      <label for="borderWidth">Border Width:</label>
+      <input type="range" min="1" max="20" step="0.5" id="borderWidth" value="4" />
+      <span id="borderVal">4</span>px
+    </div>
+    <div class="slider-wrap">
+      <label for="paddingRange">Pattern Padding:</label>
+      <input type="range" min="0" max="50" step="1" id="paddingRange" value="0" />
+      <span id="paddingVal">0</span>px
+    </div>
+    <div class="slider-wrap">
+      <label for="fillMode">Fill Mode:</label>
+      <select id="fillMode">
+        <option value="tile">Simple Tile (Clip)</option>
+        <option value="fit">Smart Fit (Scale to Boundary)</option>
+        <option value="stretch">Stretch to Fit</option>
+        <option value="flow" selected>Flow Fill (Recommended - Flowing Animation)</option>
+        <option value="auto">Auto Arrange (Grid Pack)</option>
+        <option value="manual">Manual Placement (Interactive)</option>
       </select>
-
-      <div class="folder-chooser" title="Choose a fill folder">
-        <div style="font-weight:700;color:#fff;margin-right:8px">Fill Collection</div>
-        <div id="foldersContainer" class="folders"></div>
-      </div>
-
-      <div style="display:inline-flex;align-items:center;gap:8px;">
-        <label for="patternScale" class="small" style="color:var(--muted);font-weight:600">Pattern scale</label>
-        <input id="patternScale" type="range" min="6" max="160" value="20" step="1" aria-label="Pattern scale">
-        <span id="patternScaleValue" class="small">20</span>px
-      </div>
-
-      <button id="fillPatternBtn" class="btn primary" disabled>Fill Boundary with Pattern</button>
-      <button id="clearBtn" class="btn" disabled>Reset Preview</button>
-
-      <div class="spacer"></div>
-
-      <button id="downloadPreviewBtn" class="btn" disabled>Download Preview SVG</button>
     </div>
-
-    <div class="note" id="note">Choose a fill collection to see available fills. If a collection is empty, add SVG files into OneDrive/fills/&lt;folder&gt; and run the generator to update index.json.</div>
-
-    <div class="preview-wrap" aria-live="polite">
-      <div class="panel" id="boundaryPanel" aria-label="Boundary SVG (generated)">
-        <div class="label-row"><div>Boundary</div><div class="small">Generated outlines</div></div>
-        <div class="svg-holder" id="boundaryHolder">No SVG loaded</div>
+    <div id="flowControls" style="display:block; margin-top:0.5em;">
+      <div class="slider-wrap">
+        <label for="flowRows">Fill Density (Layers):</label>
+        <input type="range" min="5" max="20" step="1" id="flowRows" value="12" />
+        <span id="flowRowsVal">12</span>
       </div>
-      <div class="panel" id="previewPanel" aria-label="Preview SVG (modified)">
-        <div class="label-row"><div>Preview</div><div class="small">Pattern / fill applied here</div></div>
-        <div class="svg-holder" id="previewHolder">No SVG loaded</div>
-        <div style="margin-top:10px;">
-          <div class="small">Available fills:</div>
-          <div id="samplesGrid" class="samples-grid">No collection selected</div>
-        </div>
-        <div style="padding-top:8px;">
-          <div id="previewInfo" class="small"></div>
-        </div>
+      <div class="slider-wrap">
+        <label for="flowSpacing">Pattern Spacing:</label>
+        <input type="range" min="0.2" max="1.2" step="0.05" id="flowSpacing" value="0.5" />
+        <span id="flowSpacingVal">0.5</span>
       </div>
     </div>
-
-    <div class="pricing-cta" role="region" aria-label="Pricing call to action">
-      <div class="cta-text">
-        <h3>Ready for your awesome Designs?</h3>
-        <p>No subscriptions, no hidden fees. Just pure creative power. Get your credits and start bringing your ideas to life today.</p>
+    <div id="autoControls" style="display:none; margin-top:0.5em;">
+      <div class="slider-wrap">
+        <label for="autoCount">Number of Copies:</label>
+        <input type="range" min="5" max="50" step="1" id="autoCount" value="20" />
+        <span id="autoCountVal">20</span>
       </div>
-      <div class="cta-actions">
-        <a class="cta-btn" href="./pricing.html" id="viewPricingBtn" aria-label="View Pricing and Credits">View Pricing &amp; Credits</a>
-        <a class="cta-secondary" href="#note" onclick="document.getElementById('fileInput').focus();return false;">Upload a file</a>
+      <div class="slider-wrap">
+        <label for="packDensity">Pack Density:</label>
+        <input type="range" min="0.5" max="2" step="0.1" id="packDensity" value="1" />
+        <span id="packDensityVal">1.0</span>
       </div>
+      <button id="regenerateBtn" style="margin-top:0.5em; padding:8px 16px; font-size:0.9em;">🔄 Regenerate Layout</button>
+    </div>
+    <div id="manualControls" style="display:none; margin-top:1em; padding:12px; background:#1a1e23; border-radius:8px;">
+      <div style="margin-bottom:8px; color:#6beeff; font-weight:700;">Manual Placement Mode</div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <button id="rotateLeft" class="manual-btn">↶ Rotate Left</button>
+        <button id="rotateRight" class="manual-btn">↷ Rotate Right</button>
+        <button id="scaleUp" class="manual-btn">+ Scale Up</button>
+        <button id="scaleDown" class="manual-btn">- Scale Down</button>
+        <button id="flipH" class="manual-btn">⟷ Flip H</button>
+        <button id="flipV" class="manual-btn">⟱ Flip V</button>
+        <button id="duplicate" class="manual-btn">⧉ Duplicate</button>
+        <button id="deleteEl" class="manual-btn" style="background:#dc3545;">✕ Delete</button>
+      </div>
+      <div style="margin-top:8px; font-size:0.9em; color:#98a3b8;">
+        Click pattern to select • Drag to move • Use buttons to adjust
+      </div>
+    </div>
+    <div class="output-wrap">
+      <svg id="svgOutput" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    <button id="downloadBtn" disabled>Download Laser-Ready SVG</button>
+    <button id="enhanceBtn" disabled style="margin-left: 12px;">Preview Animation Again</button>
+    <div style="margin-top:1.7em;" class="small">
+      ✓ Flow Fill creates beautiful flowing patterns with smooth animations<br>
+      ✓ All patterns converted to black strokes for laser engraving compatibility<br>
+      ✓ Downloaded SVG is ready for laser cutting/engraving software<br>
+      <a href="https://github.com/DBCREATIONS-lab/dfp-test" style="color:#6beeff;">Source repo</a>
     </div>
   </div>
-
-  <div id="toastContainer" class="toast-container" aria-hidden="true"></div>
   <script>
-    // Show range value for patternScale slider
-    document.getElementById('patternScale').addEventListener('input', function() {
-      document.getElementById('patternScaleValue').textContent = this.value;
+    // Helper: Get points along a path for distribution
+    function getPathPoints(pathStr, numPoints) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathStr);
+      svg.appendChild(path);
+      document.body.appendChild(svg);
+      
+      const pathLength = path.getTotalLength();
+      const points = [];
+      
+      for (let i = 0; i < numPoints; i++) {
+        const distance = (pathLength / numPoints) * i;
+        const point = path.getPointAtLength(distance);
+        
+        // Get angle at this point by sampling nearby points
+        const nextDist = Math.min(distance + 5, pathLength);
+        const nextPoint = path.getPointAtLength(nextDist);
+        const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
+        
+        points.push({ x: point.x, y: point.y, angle: angle });
+      }
+      
+      document.body.removeChild(svg);
+      return points;
+    }
+
+    // Helper: Get random points inside boundary
+    function getRandomPointsInBoundary(bbox, numPoints) {
+      const points = [];
+      for (let i = 0; i < numPoints; i++) {
+        points.push({
+          x: bbox.x + Math.random() * bbox.width,
+          y: bbox.y + Math.random() * bbox.height,
+          angle: Math.random() * 360
+        });
+      }
+      return points;
+    }
+
+    // Helper: Parse uploaded SVG string -> <svg>
+    function parseSvg(svgStr) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = svgStr;
+      return wrapper.querySelector('svg');
+    }
+
+    // Helper: Convert pattern to black strokes for laser engraving
+    function convertToBlack(svgElement) {
+      if (!svgElement) return svgElement;
+      
+      // Clone so we don't modify the original
+      const cloned = svgElement.cloneNode(true);
+      
+      // Remove any style tags with color definitions
+      const styles = cloned.querySelectorAll('style');
+      styles.forEach(style => style.remove());
+      
+      // Check if this SVG contains an embedded image
+      const images = cloned.querySelectorAll('image');
+      if (images.length > 0) {
+        console.log('WARNING: Pattern contains embedded raster image(s). These will display but may not be ideal for laser engraving.');
+        console.log('For best results, use vector SVG patterns (paths, not images).');
+        // Keep images as-is, they'll display
+        return cloned;
+      }
+      
+      // Find all elements and convert to stroke-only
+      const allElements = cloned.querySelectorAll('*');
+      allElements.forEach(el => {
+        // Remove class attributes that might reference removed styles
+        el.removeAttribute('class');
+        
+        // Handle shape elements - convert fills to strokes
+        const shapeTags = ['path', 'circle', 'rect', 'polygon', 'ellipse', 'line', 'polyline'];
+        if (shapeTags.includes(el.tagName.toLowerCase())) {
+          // Set black stroke
+          el.setAttribute('stroke', '#000000');
+          // Set stroke width if not present
+          if (!el.hasAttribute('stroke-width')) {
+            el.setAttribute('stroke-width', '1');
+          }
+          // Remove fill
+          el.setAttribute('fill', 'none');
+        }
+        
+        // Remove any inline styles
+        el.removeAttribute('style');
+      });
+      
+      // Only log once per pattern load, not every render
+      return cloned;
+    }
+    
+    // Get cached converted pattern to avoid re-converting every render
+    function getConvertedPattern() {
+      if (cachedBlackPattern && cachedPatternStr === patternSVGStr) {
+        return cachedBlackPattern.cloneNode(true);
+      }
+      
+      const patternDom = parseSvg(patternSVGStr);
+      cachedBlackPattern = convertToBlack(patternDom);
+      cachedPatternStr = patternSVGStr;
+      console.log('Pattern converted to black and cached');
+      
+      return cachedBlackPattern ? cachedBlackPattern.cloneNode(true) : null;
+    }
+
+    let boundaryPathStr = '';
+    let patternSVGStr = '';
+    let scale = 1;
+    let borderWidth = 4;
+    let padding = 0;
+    let fillMode = 'flow';
+    let autoCount = 20;
+    let packDensity = 1.0;
+    let flowRows = 12;
+    let flowSpacing = 0.5;
+    let selectedElement = null;
+    let manualElements = [];
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let elementStartX = 0;
+    let elementStartY = 0;
+    
+    // Cache for converted pattern to avoid re-processing
+    let cachedBlackPattern = null;
+    let cachedPatternStr = '';
+
+    // Helper: Get bounding box of a path
+    function getPathBBox(pathStr) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 1000 1000');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathStr);
+      svg.appendChild(path);
+      document.body.appendChild(svg);
+      const bbox = path.getBBox();
+      document.body.removeChild(svg);
+      return bbox;
+    }
+
+    // Helper: Auto-adjust viewBox to fit the boundary
+    function adjustViewBox() {
+      if (!boundaryPathStr) return;
+      const svg = document.getElementById('svgOutput');
+      const bbox = getPathBBox(boundaryPathStr);
+      
+      // Add 10% padding around the boundary
+      const paddingPercent = 0.1;
+      const extraWidth = bbox.width * paddingPercent;
+      const extraHeight = bbox.height * paddingPercent;
+      
+      const viewBoxX = bbox.x - extraWidth;
+      const viewBoxY = bbox.y - extraHeight;
+      const viewBoxWidth = bbox.width + (extraWidth * 2);
+      const viewBoxHeight = bbox.height + (extraHeight * 2);
+      
+      svg.setAttribute('viewBox', `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`);
+    }
+
+    function updateDisplay() {
+      const svg = document.getElementById('svgOutput');
+      svg.innerHTML = '';
+      
+      // Auto-adjust viewBox to fit boundary
+      adjustViewBox();
+      
+      // If we have a boundary but no pattern, show the boundary outline
+      if (boundaryPathStr && !patternSVGStr) {
+        svg.innerHTML = `
+        <g>
+          <path d="${boundaryPathStr}" fill="#f0f0f0" stroke="#262a35" stroke-width="${borderWidth}"/>
+        </g>
+        `;
+        return;
+      }
+      
+      // If we have a pattern but no boundary, show a message
+      if (!boundaryPathStr && patternSVGStr) {
+        svg.innerHTML = `
+        <text x="50%" y="50%" text-anchor="middle" fill="#262a35" font-size="18" font-family="Arial">
+          Pattern loaded! Now upload a boundary shape.
+        </text>
+        `;
+        return;
+      }
+      
+      // If we don't have both, show nothing
+      if (!boundaryPathStr || !patternSVGStr) return;
+
+      if (fillMode === 'manual') {
+        // Manual placement mode - interactive
+        const clipPath = padding > 0 
+          ? `<path d="${boundaryPathStr}" stroke-width="${padding * 2}" stroke="white" stroke-linejoin="miter"/>`
+          : `<path d="${boundaryPathStr}"/>`;
+          
+        svg.innerHTML = `
+        <defs>
+          <clipPath id="boundaryClip">
+            ${clipPath}
+          </clipPath>
+        </defs>
+        <rect x="-10000" y="-10000" width="20000" height="20000" fill="#e8e8e8" opacity="0.3"/>
+        <g clip-path="url(#boundaryClip)" id="manualContainer">
+        </g>
+        <path d="${boundaryPathStr}" fill="none" stroke="#262a35" stroke-width="${borderWidth}" pointer-events="none"/>
+        `;
+        
+        // Add or restore manual elements
+        const container = svg.querySelector('#manualContainer');
+        if (manualElements.length === 0 && patternSVGStr) {
+          // First time - add the pattern as first element
+          const bbox = getPathBBox(boundaryPathStr);
+          manualElements.push({
+            id: Date.now(),
+            x: bbox.x + bbox.width / 2,
+            y: bbox.y + bbox.height / 2,
+            scale: 0.5, // Start smaller
+            rotation: 0,
+            flipH: 1,
+            flipV: 1
+          });
+        }
+        
+        // Render all elements
+        manualElements.forEach(el => {
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('class', 'pattern-element');
+          g.setAttribute('data-id', el.id);
+          g.setAttribute('transform', `translate(${el.x},${el.y}) rotate(${el.rotation}) scale(${el.scale * el.flipH},${el.scale * el.flipV})`);
+          
+          // Use cached converted pattern
+          const blackPattern = getConvertedPattern();
+          if (blackPattern) {
+            // Clone and append all children
+            Array.from(blackPattern.children).forEach(child => {
+              g.appendChild(child.cloneNode(true));
+            });
+          }
+          
+          g.addEventListener('mousedown', selectElement);
+          container.appendChild(g);
+        });
+        
+        setupManualMode();
+        
+      } else if (fillMode === 'flow') {
+        // Dense Organic Flow Fill - completely fills shape following contours like scrollwork engraving
+        const bbox = getPathBBox(boundaryPathStr);
+        
+        svg.innerHTML = `
+        <defs>
+          <clipPath id="boundaryClip" clipPathUnits="userSpaceOnUse">
+            <path d="${boundaryPathStr}"/>
+          </clipPath>
+        </defs>
+        <g id="flowContainer" clip-path="url(#boundaryClip)">
+        </g>
+        <path d="${boundaryPathStr}" fill="none" stroke="#262a35" stroke-width="${borderWidth}" pointer-events="none"/>
+        `;
+        
+        const container = svg.querySelector('#flowContainer');
+        
+        // Get pattern dimensions
+        const patternDom = parseSvg(patternSVGStr);
+        let patternWidth = 200;
+        let patternHeight = 200;
+        if (patternDom) {
+          const vb = patternDom.getAttribute('viewBox');
+          if (vb) {
+            const parts = vb.split(/\s+|,/);
+            patternWidth = parseFloat(parts[2]) || 200;
+            patternHeight = parseFloat(parts[3]) || 200;
+          }
+        }
+        
+        // Calculate actual pattern size after scaling
+        const actualPatternWidth = patternWidth * scale;
+        const actualPatternHeight = patternHeight * scale;
+        
+        // Get boundary path for distribution
+        const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        tempPath.setAttribute('d', boundaryPathStr);
+        tempSvg.appendChild(tempPath);
+        document.body.appendChild(tempSvg);
+        const pathLength = tempPath.getTotalLength();
+        
+        // DENSE FILL ALGORITHM - fills entire area like scrollwork
+        // Create multiple layers flowing from edge to center
+        const layers = Math.max(flowRows, 8); // Minimum 8 layers for dense fill
+        const maxInset = Math.min(bbox.width, bbox.height) * 0.45; // Fill deeper into shape
+        
+        let patternCount = 0;
+        
+        for (let layer = 0; layer < layers; layer++) {
+          // Calculate how far inward this layer is
+          const layerProgress = layer / Math.max(layers - 1, 1);
+          const insetDistance = padding + (layerProgress * maxInset);
+          
+          // More patterns per layer on outer edges, fewer toward center
+          const densityFactor = 1.5 - (layerProgress * 0.5); // 1.5x to 1x density
+          const baseSpacing = actualPatternWidth * flowSpacing * 0.8; // Tighter base spacing
+          const effectiveSpacing = baseSpacing / densityFactor;
+          const patternsInLayer = Math.max(Math.floor((pathLength / effectiveSpacing) * densityFactor), 5);
+          
+          // Stagger alternate layers for better coverage
+          const stagger = (layer % 2) * 0.3 + (Math.random() * 0.2);
+          
+          for (let i = 0; i < patternsInLayer; i++) {
+            // Position along boundary perimeter
+            const positionRatio = ((i + stagger) / patternsInLayer) % 1;
+            const pathDistance = positionRatio * pathLength;
+            
+            // Get point on boundary
+            const boundaryPoint = tempPath.getPointAtLength(pathDistance);
+            
+            // Get tangent angle at this point
+            const nextDist = Math.min(pathDistance + 5, pathLength);
+            const nextPoint = tempPath.getPointAtLength(nextDist);
+            const tangentAngle = Math.atan2(nextPoint.y - boundaryPoint.y, nextPoint.x - boundaryPoint.x);
+            
+            // Calculate shape center
+            const centerX = bbox.x + bbox.width / 2;
+            const centerY = bbox.y + bbox.height / 2;
+            
+            // Vector from boundary toward center
+            const toCenterX = centerX - boundaryPoint.x;
+            const toCenterY = centerY - boundaryPoint.y;
+            const toCenterLength = Math.sqrt(toCenterX * toCenterX + toCenterY * toCenterY);
+            
+            // Move inward by inset distance
+            const inwardX = (toCenterX / toCenterLength) * insetDistance;
+            const inwardY = (toCenterY / toCenterLength) * insetDistance;
+            
+            const x = boundaryPoint.x + inwardX;
+            const y = boundaryPoint.y + inwardY;
+            
+            // Rotation follows the flow - tangent to boundary curve
+            const baseRotation = tangentAngle * 180 / Math.PI;
+            const rotationVariation = (Math.random() - 0.5) * 30; // More variation for organic look
+            const rotation = baseRotation + rotationVariation;
+            
+            // Scale variation for organic fill
+            const scaleVariation = 0.85 + Math.random() * 0.3; // 0.85x to 1.15x
+            const finalScale = scale * scaleVariation;
+            
+            // Random flips for variety
+            const flipH = (Math.random() > 0.6) ? -1 : 1;
+            const flipV = (Math.random() > 0.8) ? -1 : 1;
+            
+            // Create pattern element
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('class', 'flow-animate');
+            g.setAttribute('style', `animation-delay: ${patternCount * 0.015}s`); // Faster cascade
+            g.setAttribute('transform', `translate(${x},${y}) rotate(${rotation}) scale(${finalScale * flipH},${finalScale * flipV})`);
+            g.setAttribute('opacity', 0.95);
+            
+            // Use cached converted pattern
+            const blackPattern = getConvertedPattern();
+            if (blackPattern) {
+              Array.from(blackPattern.children).forEach(child => {
+                g.appendChild(child.cloneNode(true));
+              });
+            }
+            
+            container.appendChild(g);
+            patternCount++;
+          }
+        }
+        
+        document.body.removeChild(tempSvg);
+        console.log('Dense Flow Fill placed:', patternCount, 'patterns across', layers, 'layers');
+        
+      } else if (fillMode === 'auto') {
+        // Auto Arrange mode - dense fill pattern
+        const bbox = getPathBBox(boundaryPathStr);
+        const clipPath = padding > 0 
+          ? `<path d="${boundaryPathStr}" stroke-width="${padding * 2}" stroke="white" stroke-linejoin="miter"/>`
+          : `<path d="${boundaryPathStr}"/>`;
+          
+        svg.innerHTML = `
+        <defs>
+          <clipPath id="boundaryClip">
+            ${clipPath}
+          </clipPath>
+        </defs>
+        <g clip-path="url(#boundaryClip)" id="autoContainer">
+        </g>
+        <path d="${boundaryPathStr}" fill="none" stroke="#262a35" stroke-width="${borderWidth}" pointer-events="none"/>
+        `;
+        
+        const container = svg.querySelector('#autoContainer');
+        
+        // Create a grid-based packing system for better fill
+        const cols = Math.ceil(Math.sqrt(autoCount * 1.5));
+        const rows = Math.ceil(autoCount / cols);
+        const cellWidth = bbox.width / cols;
+        const cellHeight = bbox.height / rows;
+        
+        let placed = 0;
+        for (let row = 0; row < rows && placed < autoCount; row++) {
+          for (let col = 0; col < cols && placed < autoCount; col++) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            // Grid position with randomization
+            const baseX = bbox.x + (col * cellWidth) + (cellWidth / 2);
+            const baseY = bbox.y + (row * cellHeight) + (cellHeight / 2);
+            
+            // Add controlled randomness within cell
+            const randomX = (Math.random() - 0.5) * cellWidth * 0.7;
+            const randomY = (Math.random() - 0.5) * cellHeight * 0.7;
+            const x = baseX + randomX;
+            const y = baseY + randomY;
+            
+            // Get nearest path point to orient towards boundary
+            const pathPoints = getPathPoints(boundaryPathStr, 8);
+            let nearestAngle = 0;
+            let minDist = Infinity;
+            pathPoints.forEach(p => {
+              const dist = Math.sqrt((p.x - x) ** 2 + (p.y - y) ** 2);
+              if (dist < minDist) {
+                minDist = dist;
+                nearestAngle = p.angle;
+              }
+            });
+            
+            // Scale varies by pack density and adds randomness
+            const baseScale = scale * (0.4 / packDensity);
+            const variedScale = baseScale * (0.7 + Math.random() * 0.6);
+            
+            // Rotation based on nearest path with variation
+            const rotation = nearestAngle + (Math.random() - 0.5) * 60;
+            
+            // Random flips for variety
+            const flipH = Math.random() > 0.5 ? -1 : 1;
+            const flipV = Math.random() > 0.7 ? -1 : 1;
+            
+            g.setAttribute('transform', `translate(${x},${y}) rotate(${rotation}) scale(${variedScale * flipH},${variedScale * flipV})`);
+            g.setAttribute('opacity', 0.8 + Math.random() * 0.2);
+            
+            // Use cached converted pattern
+            const blackPattern = getConvertedPattern();
+            if (blackPattern) {
+              Array.from(blackPattern.children).forEach(child => {
+                g.appendChild(child.cloneNode(true));
+              });
+            }
+            
+            container.appendChild(g);
+            placed++;
+          }
+        }
+        
+      } else if (fillMode === 'fit' || fillMode === 'stretch') {
+        // Smart fit mode - scale pattern to boundary dimensions
+        const bbox = getPathBBox(boundaryPathStr);
+        const blackPattern = getConvertedPattern();
+        const patternSVGDom = parseSvg(patternSVGStr);
+        
+        if (blackPattern && bbox && patternSVGDom) {
+          // Get pattern viewBox or create one
+          let patternBBox = { x: 0, y: 0, width: 200, height: 200 };
+          const vb = patternSVGDom.getAttribute('viewBox');
+          if (vb) {
+            const parts = vb.split(/\s+|,/);
+            patternBBox = {
+              x: parseFloat(parts[0]) || 0,
+              y: parseFloat(parts[1]) || 0,
+              width: parseFloat(parts[2]) || 200,
+              height: parseFloat(parts[3]) || 200
+            };
+          }
+          
+          // Calculate scale to fit
+          const scaleX = (bbox.width - padding * 2) / patternBBox.width;
+          const scaleY = fillMode === 'stretch' ? (bbox.height - padding * 2) / patternBBox.height : scaleX;
+          const finalScale = fillMode === 'fit' ? Math.min(scaleX, scaleY) * scale : scaleX * scale;
+          
+          // Calculate centering offset for pattern's viewBox
+          const translateX = bbox.x + padding - (patternBBox.x * finalScale);
+          const translateY = bbox.y + padding - (patternBBox.y * finalScale);
+          
+          const clipPath = padding > 0 
+            ? `<path d="${boundaryPathStr}" stroke-width="${padding * 2}" stroke="white" stroke-linejoin="miter"/>`
+            : `<path d="${boundaryPathStr}"/>`;
+          
+          svg.innerHTML = `
+          <defs>
+            <clipPath id="boundaryClip">
+              ${clipPath}
+            </clipPath>
+          </defs>
+          <g clip-path="url(#boundaryClip)">
+            <g id="patternContent" transform="translate(${translateX}, ${translateY}) scale(${fillMode === 'stretch' ? scaleX * scale : finalScale}, ${fillMode === 'stretch' ? scaleY * scale : finalScale})"></g>
+          </g>
+          <path d="${boundaryPathStr}" fill="none" stroke="#262a35" stroke-width="${borderWidth}"/>
+          `;
+          
+          const contentGroup = svg.querySelector('#patternContent');
+          if (contentGroup) {
+            // Clone and append all children
+            Array.from(blackPattern.children).forEach(child => {
+              contentGroup.appendChild(child.cloneNode(true));
+            });
+          }
+        }
+      } else {
+        // Tile mode (original behavior)
+        console.log('Rendering tile mode, scale:', scale);
+        const clipPath = padding > 0 
+          ? `<path d="${boundaryPathStr}" stroke-width="${padding * 2}" stroke="white" stroke-linejoin="miter"/>`
+          : `<path d="${boundaryPathStr}"/>`;
+        
+        // Get pattern dimensions from viewBox
+        const patternDom = parseSvg(patternSVGStr);
+        let patternWidth = 200;
+        let patternHeight = 200;
+        if (patternDom) {
+          const vb = patternDom.getAttribute('viewBox');
+          if (vb) {
+            const parts = vb.split(/\s+|,/);
+            patternWidth = parseFloat(parts[2]) || 200;
+            patternHeight = parseFloat(parts[3]) || 200;
+          }
+          console.log('Pattern dimensions:', patternWidth, 'x', patternHeight);
+        }
+          
+        // Get the boundary bounding box for the fill rect
+        const bbox = getPathBBox(boundaryPathStr);
+        
+        // TEMPORARY DEBUG: Show pattern without clipping first
+        const testPatternDom = parseSvg(patternSVGStr);
+        let showDebugPattern = false; // Set to true to see pattern without clipping
+        
+        if (showDebugPattern && testPatternDom) {
+          console.log('DEBUG: testPatternDom:', testPatternDom);
+          console.log('DEBUG: testPatternDom has', testPatternDom.children.length, 'children');
+          svg.innerHTML = `<g id="debugPattern" transform="translate(${bbox.x}, ${bbox.y}) scale(0.3)"></g>`;
+          const debugG = svg.querySelector('#debugPattern');
+          
+          // Clone and append all children
+          Array.from(testPatternDom.children).forEach(child => {
+            console.log('DEBUG: Appending child:', child.tagName);
+            debugG.appendChild(child.cloneNode(true));
+          });
+          
+          console.log('DEBUG: Showing raw pattern without clipping');
+          console.log('DEBUG: Pattern has', debugG.children.length, 'child elements');
+          alert('DEBUG MODE: Pattern should now be visible on canvas. Check if you see light blue filigree design.');
+          return;
+        }
+        
+        svg.innerHTML = `
+        <defs>
+          <clipPath id="boundaryClip">
+            ${clipPath}
+          </clipPath>
+          <pattern id="pat" patternUnits="userSpaceOnUse" x="${bbox.x}" y="${bbox.y}" width="${patternWidth*scale}" height="${patternHeight*scale}">
+            <g id="patternTile" transform="scale(${scale})"></g>
+          </pattern>
+        </defs>
+        <g>
+          <rect x="${bbox.x - 1000}" y="${bbox.y - 1000}" width="${bbox.width + 2000}" height="${bbox.height + 2000}" fill="url(#pat)" clip-path="url(#boundaryClip)" />
+          <path d="${boundaryPathStr}" fill="none" stroke="#262a35" stroke-width="${borderWidth}"/>
+        </g>
+        `;
+        console.log('Boundary bbox:', bbox);
+
+        // Now insert the pattern content
+        const gTile = svg.querySelector('#patternTile');
+        if (gTile) {
+          let blackPattern = getConvertedPattern();
+          if (blackPattern) {
+            console.log('Tile SVG has', blackPattern.children.length, 'children');
+            // Clone and append all children
+            Array.from(blackPattern.children).forEach(child => {
+              gTile.appendChild(child.cloneNode(true));
+            });
+            console.log('Pattern tile content added, children:', gTile.children.length);
+          }
+        }
+      }
+      
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('enhanceBtn').disabled = false;
+    }
+
+    function setupManualMode() {
+      const svg = document.getElementById('svgOutput');
+      svg.addEventListener('mousemove', dragElement);
+      svg.addEventListener('mouseup', stopDragging);
+    }
+
+    function selectElement(e) {
+      e.stopPropagation();
+      const g = e.currentTarget;
+      
+      // Remove previous selection
+      document.querySelectorAll('.pattern-element').forEach(el => {
+        el.classList.remove('selected');
+      });
+      
+      // Select this element
+      g.classList.add('selected');
+      selectedElement = parseInt(g.getAttribute('data-id'));
+      
+      // Start dragging
+      isDragging = true;
+      const pt = getSVGPoint(e);
+      dragStartX = pt.x;
+      dragStartY = pt.y;
+      
+      const el = manualElements.find(el => el.id === selectedElement);
+      if (el) {
+        elementStartX = el.x;
+        elementStartY = el.y;
+      }
+    }
+
+    function dragElement(e) {
+      if (!isDragging || !selectedElement) return;
+      
+      const pt = getSVGPoint(e);
+      const dx = pt.x - dragStartX;
+      const dy = pt.y - dragStartY;
+      
+      const el = manualElements.find(el => el.id === selectedElement);
+      if (el) {
+        el.x = elementStartX + dx;
+        el.y = elementStartY + dy;
+        updateDisplay();
+      }
+    }
+
+    function stopDragging() {
+      isDragging = false;
+    }
+
+    function getSVGPoint(e) {
+      const svg = document.getElementById('svgOutput');
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    document.getElementById('boundarySVG').addEventListener('change', function(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const svgText = e.target.result;
+        // Extract the first <path> d=
+        const pathMatch = svgText.match(/<path[^>]*d=["']([^"']+)["']/i);
+        if (pathMatch) {
+          boundaryPathStr = pathMatch[1];
+          updateDisplay();
+        } else {
+          alert("Couldn't read a <path> from your boundary SVG.");
+        }
+      };
+      reader.readAsText(file);
     });
-    // Add additional JS as needed for your app
+
+    document.getElementById('patternSVG').addEventListener('change', function(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        patternSVGStr = e.target.result;
+        console.log('Pattern loaded, length:', patternSVGStr.length);
+        console.log('Pattern preview:', patternSVGStr.substring(0, 200));
+        console.log('Boundary exists:', !!boundaryPathStr);
+        console.log('Fill mode:', fillMode);
+        updateDisplay();
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('scaleRange').addEventListener('input', function(evt) {
+      scale = parseFloat(this.value);
+      document.getElementById('scaleVal').textContent = scale.toFixed(2);
+      updateDisplay();
+    });
+
+    document.getElementById('borderWidth').addEventListener('input', function(evt) {
+      borderWidth = parseFloat(this.value);
+      document.getElementById('borderVal').textContent = borderWidth.toFixed(1);
+      updateDisplay();
+    });
+
+    document.getElementById('paddingRange').addEventListener('input', function(evt) {
+      padding = parseFloat(this.value);
+      document.getElementById('paddingVal').textContent = padding;
+      updateDisplay();
+    });
+
+    document.getElementById('fillMode').addEventListener('change', function(evt) {
+      fillMode = this.value;
+      document.getElementById('manualControls').style.display = fillMode === 'manual' ? 'block' : 'none';
+      document.getElementById('autoControls').style.display = fillMode === 'auto' ? 'block' : 'none';
+      document.getElementById('flowControls').style.display = fillMode === 'flow' ? 'block' : 'none';
+      if (fillMode !== 'manual') {
+        manualElements = [];
+        selectedElement = null;
+      }
+      updateDisplay();
+    });
+
+    document.getElementById('autoCount').addEventListener('input', function(evt) {
+      autoCount = parseInt(this.value);
+      document.getElementById('autoCountVal').textContent = autoCount;
+      updateDisplay();
+    });
+
+    document.getElementById('packDensity').addEventListener('input', function(evt) {
+      packDensity = parseFloat(this.value);
+      document.getElementById('packDensityVal').textContent = packDensity.toFixed(1);
+      updateDisplay();
+    });
+
+    document.getElementById('regenerateBtn').addEventListener('click', function() {
+      updateDisplay(); // Regenerate with new random positions
+    });
+
+    document.getElementById('flowRows').addEventListener('input', function(evt) {
+      flowRows = parseInt(this.value);
+      document.getElementById('flowRowsVal').textContent = flowRows;
+      updateDisplay();
+    });
+
+    document.getElementById('flowSpacing').addEventListener('input', function(evt) {
+      flowSpacing = parseFloat(this.value);
+      document.getElementById('flowSpacingVal').textContent = flowSpacing.toFixed(1);
+      updateDisplay();
+    });
+
+    // Manual mode controls
+    document.getElementById('rotateLeft').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.rotation -= 15;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('rotateRight').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.rotation += 15;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('scaleUp').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.scale *= 1.1;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('scaleDown').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.scale *= 0.9;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('flipH').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.flipH *= -1;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('flipV').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        el.flipV *= -1;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('duplicate').addEventListener('click', function() {
+      if (!selectedElement) return;
+      const el = manualElements.find(e => e.id === selectedElement);
+      if (el) {
+        const newEl = {
+          id: Date.now(),
+          x: el.x + 20,
+          y: el.y + 20,
+          scale: el.scale,
+          rotation: el.rotation,
+          flipH: el.flipH,
+          flipV: el.flipV
+        };
+        manualElements.push(newEl);
+        selectedElement = newEl.id;
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('deleteEl').addEventListener('click', function() {
+      if (!selectedElement) return;
+      manualElements = manualElements.filter(e => e.id !== selectedElement);
+      selectedElement = null;
+      updateDisplay();
+    });
+
+    document.getElementById('enhanceBtn').addEventListener('click', function() {
+      // Replay the flow animation
+      if (!boundaryPathStr || !patternSVGStr) {
+        alert('Please upload both boundary and pattern files first!');
+        return;
+      }
+      
+      // Re-render to trigger animation again
+      updateDisplay();
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const svg = document.getElementById('svgOutput');
+      const data = '<?xml version="1.0"?>\n' + svg.outerHTML;
+      const blob = new Blob([data], {type: 'image/svg+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'engrave-filled.svg';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>document.body.removeChild(a), 100);
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test Boundary Image</title>
+</head>
+<body>
+    <h1>Test Boundary Image Generator</h1>
+    <p>Right-click the shape below and "Save image as..." to save as PNG:</p>
+    
+    <canvas id="testCanvas" width="400" height="200" style="border: 1px solid black;"></canvas>
+    
+    <br><br>
+    <button onclick="downloadImage()">Download Test PNG</button>
+    
+    <script>
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Fill with white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 400, 200);
+        
+        // Draw a simple knife blade shape in black
+        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        
+        ctx.beginPath();
+        // Simple blade outline
+        ctx.moveTo(50, 100);  // Handle start
+        ctx.lineTo(150, 100); // Handle
+        ctx.lineTo(160, 90);  // Blade start
+        ctx.lineTo(350, 95);  // Blade top
+        ctx.lineTo(360, 100); // Tip
+        ctx.lineTo(350, 105); // Blade bottom
+        ctx.lineTo(160, 110); // Blade end
+        ctx.lineTo(150, 100); // Back to handle
+        ctx.closePath();
+        ctx.stroke();
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'test-knife-boundary.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
